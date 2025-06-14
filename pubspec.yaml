@@ -19,7 +19,7 @@ dependencies:
   go_router: ^14.2.7
   
   # Local Database
-  drift: ^2.18.0
+  drift: ^2.26.1
   sqlite3_flutter_libs: ^0.5.24
   path_provider: ^2.1.4
   path: ^1.9.0
@@ -31,7 +31,7 @@ dependencies:
   
   # JSON Serialization
   json_annotation: ^4.9.0
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.0.0
   
   # UI/UX
   cupertino_icons: ^1.0.8
@@ -77,14 +77,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   
   # Code Generation
-  build_runner: ^2.4.12
-  drift_dev: ^2.18.0
-  json_serializable: ^6.8.0
-  freezed: ^2.5.7
-  riverpod_generator: ^2.4.3
+  build_runner: ^2.4.15
+  drift_dev: ^2.26.1
+  json_serializable: ^6.9.5
+  freezed: ^3.0.6
+  riverpod_generator: ^2.6.5
   retrofit_generator: ^8.1.2
   
   # Testing
