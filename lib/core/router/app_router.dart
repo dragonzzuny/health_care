@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Import feature screens
-import '../features/auth/presentation/login_screen.dart';
-import '../features/auth/presentation/register_screen.dart';
-import '../features/activity/presentation/activity_screen.dart';
-import '../features/challenge/presentation/challenge_screen.dart';
-import '../features/food/presentation/food_screen.dart';
-import '../features/body/presentation/body_screen.dart';
-import '../features/sleep/presentation/sleep_screen.dart';
-import '../features/chat/presentation/chat_screen.dart';
-import '../features/report/presentation/report_screen.dart';
-import '../features/medication/presentation/medication_screen.dart';
-import '../features/cosmetics/presentation/cosmetics_screen.dart';
-import '../features/weather/presentation/weather_screen.dart';
-import '../shared/widgets/main_navigation.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../features/activity/presentation/activity_screen.dart';
+import '../../features/challenge/presentation/challenge_screen.dart';
+import '../../features/food/presentation/food_screen.dart';
+import '../../features/body/presentation/body_screen.dart';
+import '../../features/sleep/presentation/sleep_screen.dart';
+import '../../features/chat/presentation/chat_screen.dart';
+import '../../features/report/presentation/report_screen.dart';
+import '../../features/medication/presentation/medication_screen.dart';
+import '../../features/cosmetics/presentation/cosmetics_screen.dart';
+import '../../features/weather/presentation/weather_screen.dart';
+import '../../shared/widgets/main_navigation.dart';
 
 // Route paths
 class AppRoutes {
