@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../models/user_model.dart';
+import '../models/health_data_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../features/weather/services/weather_service.dart';
 import '../../features/ai/services/ai_service.dart';

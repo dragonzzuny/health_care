@@ -80,7 +80,6 @@ class WeatherService {
     try {
       // 좌표를 주소로 변환
       final address = await _getAddressFromCoordinates(lat, lon);
-
       final response = await _dio.get(
         'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty',
         queryParameters: {
