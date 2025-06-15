@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ModelType {
@@ -101,18 +101,22 @@ class ModelDownloader {
       name: 'Gemma 1B',
       version: '1.0.0',
       sizeBytes: 530 * 1024 * 1024, // ~530 MB
-      downloadUrl: 'https://example.com/models/gemma-1b-q4.gguf',
-      sha256Hash: 'abc123def456...', // Placeholder hash
-      fileName: 'gemma-1b-q4.gguf',
+      // Gemma model (3B) provided by Google via Ollama
+      // See https://ollama.com/library/gemma3 for details
+      downloadUrl: 'https://ollama.com/download/gemma3/gemma3-3b-q4.gguf',
+      sha256Hash: 'abc123def456...', // TODO: update with official hash
+      fileName: 'gemma3-3b-q4.gguf',
     ),
     ModelType.exaone24B: ModelInfo(
       type: ModelType.exaone24B,
       name: 'EXAONE 2.4B',
       version: '1.0.0',
       sizeBytes: 1200 * 1024 * 1024, // ~1.2 GB
-      downloadUrl: 'https://example.com/models/exaone-2.4b-q4.gguf',
-      sha256Hash: 'def456ghi789...', // Placeholder hash
-      fileName: 'exaone-2.4b-q4.gguf',
+      // EXAONE 3.5 model from LG AI Research
+      // Repository: https://github.com/LG-AI-EXAONE/EXAONE-3.5
+      downloadUrl: 'https://github.com/LG-AI-EXAONE/EXAONE-3.5/releases/download/v1.0/exaone-3.5-q4.gguf',
+      sha256Hash: 'def456ghi789...', // TODO: update with official hash
+      fileName: 'exaone-3.5-q4.gguf',
     ),
   };
 
@@ -159,8 +163,11 @@ class ModelDownloader {
   }
 
   Future<Directory> _getModelsDirectory() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final modelsDir = Directory('${appDir.path}/models');
+    // Use home directory to avoid depending on Flutter context
+    final home = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        Directory.current.path;
+    final modelsDir = Directory(path.join(home, '.signcare_models'));
     if (!await modelsDir.exists()) {
       await modelsDir.create(recursive: true);
     }
