@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../../core/constants/app_constants.dart';
+import '../../features/weather/services/weather_service.dart';
+import '../../features/ai/services/ai_service.dart';
 
 // Dio Provider
 final dioProvider = Provider<Dio>((ref) {
@@ -78,6 +80,19 @@ final dioProvider = Provider<Dio>((ref) {
 final apiServiceProvider = Provider<ApiService>((ref) {
   final dio = ref.watch(dioProvider);
   return ApiService(dio);
+});
+
+// Weather Service Provider
+final weatherServiceProvider = Provider<WeatherService>((ref) {
+  final dio = ref.watch(dioProvider);
+  return WeatherService(dio);
+});
+
+// AI Service Provider
+final aiServiceProvider = StateNotifierProvider<AIService, AIServiceState>((ref) {
+  final dio = ref.watch(dioProvider);
+  final apiService = ref.watch(apiServiceProvider);
+  return AIService(dio, apiService);
 });
 
 // Shared Preferences Provider
