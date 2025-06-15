@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:collection/collection.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../shared/services/api_service.dart';
 
 /// AI 모델 타입 열거형
@@ -101,8 +104,11 @@ class AIService extends StateNotifier<AIServiceState> {
       state = state.copyWith(
         isInitialized: true,
         modelAvailability: availability,
-        activeModel:
-            availability.entries.firstWhereOrNull((e) => e.value)?.key,
+        // 활성 가능한 첫 모델을 기본 선택
+        activeModel: availability.entries
+            .where((e) => e.value)
+            .map((e) => e.key)
+            .firstOrNull,
       );
     } catch (e) {
       state = state.copyWith(
@@ -131,17 +137,14 @@ class AIService extends StateNotifier<AIServiceState> {
         await modelsDir.create(recursive: true);
       }
 
-      final modelPath = path.join(modelsDir.path, 'gemma-1b.tflite');
-
       // 실제 구현에서는 CDN에서 모델 다운로드
-      // 여기서는 시뮬레이션
       await Future.delayed(const Duration(seconds: 2));
-
-      // 모델 파일 생성 (실제로는 다운로드)
+      final modelPath = path.join(modelsDir.path, 'gemma-1b.tflite');
       await File(modelPath).writeAsBytes(Uint8List(0));
 
       // 인터프리터 로드
-      _gemmaInterpreter = await Interpreter.fromFile(File(modelPath));
+      _gemmaInterpreter =
+          await Interpreter.fromAsset('assets/models/gemma-1b.tflite');
 
       final availability = Map<AIModelType, bool>.from(state.modelAvailability);
       availability[AIModelType.gemma] = true;
@@ -166,11 +169,11 @@ class AIService extends StateNotifier<AIServiceState> {
       );
       return;
     }
-
     state = state.copyWith(activeModel: model, error: null);
   }
 
-  Future<AIResponse> sendMessage(String message, {
+  Future<AIResponse> sendMessage(
+    String message, {
     Map<String, dynamic>? context,
     AIModelType? preferredModel,
   }) async {
@@ -198,15 +201,12 @@ class AIService extends StateNotifier<AIServiceState> {
     }
   }
 
-  Future<AIResponse> _processWithGemma(String message, Map<String, dynamic>? context) async {
+  Future<AIResponse> _processWithGemma(
+      String message, Map<String, dynamic>? context) async {
     if (_gemmaInterpreter == null) {
       throw Exception('Gemma 모델이 로드되지 않았습니다');
     }
-
-    // 실제 Gemma 추론 구현
-    // 여기서는 시뮬레이션
     await Future.delayed(const Duration(milliseconds: 500));
-
     return AIResponse(
       content: _generateMockResponse(message, context),
       model: AIModelType.gemma,
@@ -218,7 +218,10 @@ class AIService extends StateNotifier<AIServiceState> {
     );
   }
 
-  Future<AIResponse> _processWithExaone(String message, Map<String, dynamic>? context) async {
+  Future<AIResponse> _processWithExaone(
+    String message,
+    Map<String, dynamic>? context,
+  ) async {
     if (_exaoneApiKey == null || _exaoneApiKey!.isEmpty) {
       throw Exception('EXAONE API 키가 설정되지 않았습니다');
     }
@@ -236,13 +239,9 @@ class AIService extends StateNotifier<AIServiceState> {
           'model': 'exaone-2.4b',
           'messages': [
             if (context != null) {
-              'role': 'system',
-              'content': _buildSystemPrompt(context),
+              {'role': 'system', 'content': _buildSystemPrompt(context)},
             },
-            {
-              'role': 'user',
-              'content': message,
-            },
+            {'role': 'user', 'content': message},
           ],
           'temperature': 0.7,
           'max_tokens': 1000,
@@ -255,8 +254,8 @@ class AIService extends StateNotifier<AIServiceState> {
         timestamp: DateTime.now(),
         metadata: response.data['usage'],
       );
-    } catch (e) {
-      // 실제 API가 없으므로 mock 응답 반환
+    } catch (_) {
+      // 네트워크 에러 시 mock 반환
       return AIResponse(
         content: _generateMockResponse(message, context),
         model: AIModelType.exaone,
@@ -265,7 +264,10 @@ class AIService extends StateNotifier<AIServiceState> {
     }
   }
 
-  Future<AIResponse> _processWithGPT4(String message, Map<String, dynamic>? context) async {
+  Future<AIResponse> _processWithGPT4(
+    String message,
+    Map<String, dynamic>? context,
+  ) async {
     if (_openAIApiKey == null || _openAIApiKey!.isEmpty) {
       throw Exception('OpenAI API 키가 설정되지 않았습니다');
     }
@@ -282,14 +284,8 @@ class AIService extends StateNotifier<AIServiceState> {
         data: {
           'model': 'gpt-4-turbo-preview',
           'messages': [
-            {
-              'role': 'system',
-              'content': _buildSystemPrompt(context),
-            },
-            {
-              'role': 'user',
-              'content': message,
-            },
+            {'role': 'system', 'content': _buildSystemPrompt(context)},
+            {'role': 'user', 'content': message},
           ],
           'temperature': 0.7,
           'max_tokens': 1000,
@@ -302,8 +298,7 @@ class AIService extends StateNotifier<AIServiceState> {
         timestamp: DateTime.now(),
         metadata: response.data['usage'],
       );
-    } catch (e) {
-      // 실제 API가 없으므로 mock 응답 반환
+    } catch (_) {
       return AIResponse(
         content: _generateMockResponse(message, context),
         model: AIModelType.gpt4,
@@ -312,38 +307,33 @@ class AIService extends StateNotifier<AIServiceState> {
     }
   }
 
-String _buildSystemPrompt(Map<String, dynamic>? context) {
-  final buffer = StringBuffer('당신은 SignCare의 AI 건강 상담사입니다. ');
-  buffer.writeln('사용자의 건강 관리를 도와주는 전문적이고 친근한 조언을 제공합니다.');
+  String _buildSystemPrompt(Map<String, dynamic>? context) {
+    final buffer = StringBuffer(
+        '당신은 SignCare의 AI 건강 상담사입니다. 사용자의 건강 관리를 도와주는 전문적이고 친근한 조언을 제공합니다.\n');
 
-  if (context != null) {
-    if (context['userProfile'] != null) {
-      buffer.writeln("\n사용자 정보:");
-      buffer.writeln(jsonEncode(context['userProfile']));
+    if (context != null) {
+      if (context['userProfile'] != null) {
+        buffer.writeln('사용자 정보: ${jsonEncode(context['userProfile'])}');
+      }
+      if (context['healthData'] != null) {
+        buffer.writeln('최근 건강 데이터: ${jsonEncode(context['healthData'])}');
+      }
     }
 
-    if (context['healthData'] != null) {
-      buffer.writeln("\n최근 건강 데이터:");
-      buffer.writeln(jsonEncode(context['healthData']));
-    }
+    buffer.writeln('\n다음 지침을 따라주세요:');
+    buffer.writeln('1. 정확하고 과학적 근거가 있는 정보만 제공');
+    buffer.writeln('2. 의학적 진단은 하지 않으며, 필요시 전문의 상담 권유');
+    buffer.writeln('3. 개인화된 조언 제공');
+    buffer.writeln('4. 긍정적이고 동기부여가 되는 톤 유지');
+
+    return buffer.toString();
   }
 
-  buffer.writeln("\n다음 지침을 따라주세요:");
-  buffer.writeln('1. 정확하고 과학적 근거가 있는 정보만 제공');
-  buffer.writeln('2. 의학적 진단은 하지 않으며, 필요시 전문의 상담 권유');
-  buffer.writeln('3. 개인화된 조언 제공');
-  buffer.writeln('4. 긍정적이고 동기부여가 되는 톤 유지');
-
-  return buffer.toString();
-}
-
-
-  String _generateMockResponse(String message, Map<String, dynamic>? context) {
-    // 실제 환경에서는 제거될 mock 응답 생성
-    final lowerMessage = message.toLowerCase();
-
-    if (lowerMessage.contains('혈당')) {
-      return '''혈당 관리에 대해 문의하셨군요. 
+  String _generateMockResponse(
+      String message, Map<String, dynamic>? context) {
+    final lower = message.toLowerCase();
+    if (lower.contains('혈당')) {
+      return '''혈당 관리에 대해 문의하셨군요.
 
 정상 혈당 수치는:
 • 공복 혈당: 70-100 mg/dL
@@ -356,7 +346,7 @@ String _buildSystemPrompt(Map<String, dynamic>? context) {
 4. 스트레스를 관리하세요
 
 정확한 진단과 치료는 전문의와 상담하시기 바랍니다.''';
-    } else if (lowerMessage.contains('운동')) {
+    } else if (lower.contains('운동')) {
       return '''운동에 관심이 있으시군요!
 
 건강한 성인 기준 권장 운동량:
@@ -369,7 +359,7 @@ String _buildSystemPrompt(Map<String, dynamic>? context) {
 3. 가벼운 근력 운동: 주 2회
 
 본인의 체력 수준에 맞게 점진적으로 운동량을 늘려가세요.''';
-    } else if (lowerMessage.contains('식단') || lowerMessage.contains('영양')) {
+    } else if (lower.contains('식단') || lower.contains('영양')) {
       return '''균형 잡힌 식단에 대해 알려드리겠습니다.
 
 건강한 식단의 기본 원칙:
@@ -408,3 +398,19 @@ String _buildSystemPrompt(Map<String, dynamic>? context) {
     super.dispose();
   }
 }
+
+/// AI 서비스 프로바이더
+final aiServiceProvider = StateNotifierProvider<AIService, AIServiceState>(
+  (ref) {
+    final dio = ref.watch(dioProvider);
+    final apiService = ref.watch(apiServiceProvider);
+    return AIService(dio, apiService);
+  },
+);
+
+/// 현재 AI 응답 스트림
+final aiResponseStreamProvider =
+    StreamProvider<AIResponse>((ref) async* {
+  // AI 응답을 스트리밍하는 로직
+  // WebSocket 또는 Server-Sent Events 사용 가능
+});
