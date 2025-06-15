@@ -214,7 +214,7 @@ class _BodyScreenState extends State<BodyScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.three_d_rotation,
+                    Icons.threed_rotation,
                     size: 48,
                     color: Theme.of(context).colorScheme.primary,
                   ),

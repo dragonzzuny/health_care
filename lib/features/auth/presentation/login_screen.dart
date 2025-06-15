@@ -296,7 +296,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 12),
                   _buildSocialLoginButton(
                     'Naver로 계속하기',
-                    Icons.n_mobiledata,
+                    Icons.language,
                     const Color(0xFF03C75A),
                     () => _socialLogin('Naver'),
                   ),
