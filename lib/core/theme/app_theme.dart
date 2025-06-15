@@ -149,14 +149,14 @@ class AppTheme {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       color: surfaceColor,
       elevation: 2,
       shadowColor: shadowColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
-      margin: const EdgeInsets.all(8),
+      margin: EdgeInsets.all(8),
     ),
     
     // Elevated Button Theme
