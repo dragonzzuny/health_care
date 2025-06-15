@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ModelType {
@@ -163,8 +163,11 @@ class ModelDownloader {
   }
 
   Future<Directory> _getModelsDirectory() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final modelsDir = Directory('${appDir.path}/models');
+    // Use home directory to avoid depending on Flutter context
+    final home = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        Directory.current.path;
+    final modelsDir = Directory(path.join(home, '.signcare_models'));
     if (!await modelsDir.exists()) {
       await modelsDir.create(recursive: true);
     }
