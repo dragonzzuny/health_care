@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import '../../../core/constants/app_constants.dart';
+import 'package:collection/collection.dart';
 import '../../../shared/services/api_service.dart';
 
 /// AI 모델 타입 열거형
@@ -101,10 +101,8 @@ class AIService extends StateNotifier<AIServiceState> {
       state = state.copyWith(
         isInitialized: true,
         modelAvailability: availability,
-        activeModel: availability.entries
-            .where((e) => e.value)
-            .map((e) => e.key)
-            .firstOrNull,
+        activeModel:
+            availability.entries.firstWhereOrNull((e) => e.value)?.key,
       );
     } catch (e) {
       state = state.copyWith(
@@ -143,7 +141,7 @@ class AIService extends StateNotifier<AIServiceState> {
       await File(modelPath).writeAsBytes(Uint8List(0));
 
       // 인터프리터 로드
-      _gemmaInterpreter = await Interpreter.fromAsset('assets/models/gemma-1b.tflite');
+      _gemmaInterpreter = await Interpreter.fromFile(File(modelPath));
 
       final availability = Map<AIModelType, bool>.from(state.modelAvailability);
       availability[AIModelType.gemma] = true;
@@ -421,7 +419,5 @@ final aiServiceProvider = StateNotifierProvider<AIService, AIServiceState>((ref)
 });
 
 /// 현재 AI 응답 스트림
-final aiResponseStreamProvider = StreamProvider<AIResponse>((ref) async* {
-  // AI 응답을 스트리밍하는 로직
-  // WebSocket 또는 Server-Sent Events 사용 가능
-});
+final aiResponseStreamProvider =
+    StreamProvider<AIResponse>((ref) => const Stream.empty());

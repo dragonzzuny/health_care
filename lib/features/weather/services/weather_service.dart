@@ -1,8 +1,5 @@
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import 'package:geolocator/geolocator.dart';
-import '../../../core/constants/app_constants.dart';
 import '../models/weather_models.dart';
 
 /// 날씨 API 키 (환경 변수에서 가져옴)
