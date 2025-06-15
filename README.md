@@ -284,6 +284,13 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 5. 푸시: `git push origin feature/새기능`
 6. Pull Request 생성
 
+## 중금속 측정 데이터 조회 예제 (Python)
+
+```bash
+echo "SERVICE_KEY=<발급받은 서비스키>" > .env
+python scripts/metal_measurement.py
+```
+
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
