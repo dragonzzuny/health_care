@@ -1,4 +1,3 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,7 +11,7 @@ const String _airQualityApiKey = String.fromEnvironment('AIRQUALITY_API_KEY');
 /// 날씨 서비스 구현
 class WeatherService {
   final Dio _dio;
-  
+
   WeatherService(this._dio);
 
   /// 현재 날씨 가져오기
@@ -28,7 +27,6 @@ class WeatherService {
           'lang': 'kr',
         },
       );
-
       return WeatherData.fromOpenWeatherMap(response.data);
     } catch (e) {
       // API 키가 없거나 에러 발생 시 mock 데이터 반환
@@ -47,7 +45,6 @@ class WeatherService {
           'appid': _openWeatherApiKey,
         },
       );
-
       return AirQualityData.fromOpenWeatherMap(response.data);
     } catch (e) {
       // API 키가 없거나 에러 발생 시 mock 데이터 반환
@@ -69,7 +66,6 @@ class WeatherService {
           'cnt': 7,
         },
       );
-
       return (response.data['list'] as List)
           .map((item) => WeatherForecast.fromOpenWeatherMap(item))
           .toList();
@@ -84,7 +80,7 @@ class WeatherService {
     try {
       // 좌표를 주소로 변환
       final address = await _getAddressFromCoordinates(lat, lon);
-      
+
       final response = await _dio.get(
         'http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty',
         queryParameters: {
@@ -97,7 +93,6 @@ class WeatherService {
           'ver': '1.0',
         },
       );
-
       return AirQualityData.fromKoreaAPI(response.data);
     } catch (e) {
       return _getMockAirQualityData();
@@ -107,7 +102,6 @@ class WeatherService {
   /// 좌표를 주소로 변환
   Future<AddressInfo> _getAddressFromCoordinates(double lat, double lon) async {
     try {
-      // Kakao 또는 Naver API 사용
       final response = await _dio.get(
         'https://dapi.kakao.com/v2/local/geo/coord2address.json',
         queryParameters: {
@@ -120,7 +114,6 @@ class WeatherService {
           },
         ),
       );
-
       return AddressInfo.fromKakaoAPI(response.data);
     } catch (e) {
       return AddressInfo(
@@ -171,7 +164,8 @@ class WeatherService {
         date: now.add(Duration(days: index)),
         maxTemp: 25 + (index % 3),
         minTemp: 15 + (index % 3),
-        condition: WeatherCondition.values[index % WeatherCondition.values.length],
+        condition:
+            WeatherCondition.values[index % WeatherCondition.values.length],
         description: ['맑음', '구름 조금', '흐림', '비', '눈'][index % 5],
         precipitationChance: [10, 20, 60, 80, 30][index % 5],
       );
