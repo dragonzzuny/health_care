@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-class FoodScreen extends StatefulWidget {
+import '../../../shared/providers/app_providers.dart';
+import '../../../shared/services/api_service.dart';
+
+class FoodScreen extends ConsumerStatefulWidget {
   const FoodScreen({super.key});
 
   @override
-  State<FoodScreen> createState() => _FoodScreenState();
+  ConsumerState<FoodScreen> createState() => _FoodScreenState();
 }
 
-class _FoodScreenState extends State<FoodScreen>
+class _FoodScreenState extends ConsumerState<FoodScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -497,6 +504,41 @@ class _FoodScreenState extends State<FoodScreen>
     );
   }
 
+  Future<void> _captureAndRecognize() async {
+    final XFile? picked = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+    );
+
+    if (picked == null) return;
+
+    final notifier = ref.read(foodRecognitionProvider.notifier);
+    await notifier.recognizeFood(File(picked.path));
+
+    final result = ref.read(foodRecognitionProvider);
+
+    if (!mounted) return;
+
+    if (result.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('인식 실패: ${result.error}')),
+      );
+      return;
+    }
+
+    if (result.recognizedFoods.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('인식된 음식이 없습니다')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => _RecognitionResultSheet(foods: result.recognizedFoods),
+    );
+  }
+
   void _showAddFoodDialog() {
     showModalBottomSheet(
       context: context,
@@ -518,9 +560,7 @@ class _FoodScreenState extends State<FoodScreen>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('카메라 기능 준비 중입니다')),
-                      );
+                      _captureAndRecognize();
                     },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('사진 촬영'),
@@ -540,6 +580,41 @@ class _FoodScreenState extends State<FoodScreen>
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecognitionResultSheet extends StatelessWidget {
+  final List<FoodItem> foods;
+
+  const _RecognitionResultSheet({required this.foods});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '인식 결과',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            ...foods.map(
+              (f) => ListTile(
+                title: Text(f.name),
+                subtitle: Text(
+                    '${(f.caloriesPerGram * 100).toStringAsFixed(0)} kcal/100g'),
+              ),
             ),
           ],
         ),
