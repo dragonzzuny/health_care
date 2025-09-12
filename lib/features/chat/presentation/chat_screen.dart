@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/chat_providers.dart';
+import '../models/chat_models.dart';
+import '../../../core/llm/llm_router.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
-  bool _isTyping = false;
 
   @override
   void initState() {
     super.initState();
-    _addWelcomeMessage();
   }
 
   @override
@@ -26,71 +27,16 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _addWelcomeMessage() {
-    _messages.add(
-      ChatMessage(
-        text: '안녕하세요! 저는 SignCare AI 건강 상담사입니다. 🏥\n\n건강과 관련된 궁금한 점이 있으시면 언제든 물어보세요. 식단, 운동, 수면, 스트레스 관리 등 다양한 주제로 도움을 드릴 수 있습니다.',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
-    );
-  }
 
   void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          text: text,
-          isUser: true,
-          timestamp: DateTime.now(),
-        ),
-      );
-      _isTyping = true;
-    });
-
+    ref.read(chatLLMProvider.notifier).sendMessage(text);
     _messageController.clear();
     _scrollToBottom();
-
-    // Simulate AI response
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _messages.add(
-          ChatMessage(
-            text: _generateAIResponse(text),
-            isUser: false,
-            timestamp: DateTime.now(),
-          ),
-        );
-        _isTyping = false;
-      });
-      _scrollToBottom();
-    });
   }
 
-  String _generateAIResponse(String userMessage) {
-    final message = userMessage.toLowerCase();
-    
-    if (message.contains('식단') || message.contains('음식') || message.contains('칼로리')) {
-      return '식단 관리에 대해 궁금하시군요! 🍎\n\n균형잡힌 식단을 위해서는:\n• 탄수화물 50-60%\n• 단백질 15-20%\n• 지방 20-30%\n\n의 비율로 섭취하시는 것이 좋습니다. 현재 식단 기록을 보면서 더 구체적인 조언을 드릴 수 있어요!';
-    }
-    
-    if (message.contains('운동') || message.contains('헬스') || message.contains('근육')) {
-      return '운동에 관심이 있으시네요! 💪\n\n초보자라면:\n• 주 3회, 30분씩 시작\n• 유산소 + 근력운동 병행\n• 충분한 휴식과 수분 섭취\n\n현재 체력 수준에 맞는 맞춤 운동 계획을 세워드릴까요?';
-    }
-    
-    if (message.contains('수면') || message.contains('잠') || message.contains('불면')) {
-      return '수면 건강이 걱정되시는군요! 😴\n\n좋은 수면을 위해서는:\n• 규칙적인 수면 패턴\n• 취침 1시간 전 스마트폰 금지\n• 적절한 실내 온도 (18-22도)\n• 카페인 섭취 제한\n\n수면 패턴을 분석해서 개선 방안을 제안해드릴 수 있어요!';
-    }
-    
-    if (message.contains('스트레스') || message.contains('우울') || message.contains('불안')) {
-      return '스트레스 관리는 정말 중요해요! 🧘‍♀️\n\n스트레스 해소 방법:\n• 규칙적인 운동\n• 명상이나 요가\n• 충분한 수면\n• 취미 활동\n• 사회적 관계 유지\n\n심각한 증상이 지속된다면 전문의 상담을 받아보시는 것을 권해드려요.';
-    }
-    
-    return '좋은 질문이네요! 😊\n\n더 구체적인 상황을 알려주시면 맞춤형 조언을 드릴 수 있어요. 예를 들어:\n• 현재 상황이나 증상\n• 목표나 궁금한 점\n• 생활 패턴\n\n등을 말씀해주시면 더 도움이 될 것 같아요!';
-  }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -127,12 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  '온라인',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.green,
-                  ),
-                ),
+                _buildStatusText(),
               ],
             ),
           ],
@@ -156,15 +97,20 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              itemCount: ref.watch(chatLLMProvider).messages.length + (ref.watch(chatLLMProvider).isLoading ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index == _messages.length && _isTyping) {
+                final chatState = ref.watch(chatLLMProvider);
+                if (index == chatState.messages.length && chatState.isLoading) {
                   return _buildTypingIndicator();
                 }
-                return _buildMessageBubble(_messages[index]);
+                return _buildMessageBubble(chatState.messages[index]);
               },
             ),
           ),
+          
+          // Error display
+          if (ref.watch(chatLLMProvider).error != null)
+            _buildErrorBar(),
           
           // Input Area
           _buildInputArea(),
@@ -197,8 +143,10 @@ class _ChatScreenState extends State<ChatScreen> {
         avatar: Icon(icon, size: 16),
         label: Text(label),
         onPressed: () {
-          _messageController.text = '$label에 대해 알려주세요';
-          _sendMessage();
+          final quickActions = ref.read(quickActionProvider);
+          final message = quickActions[label] ?? '$label에 대해 알려주세요';
+          ref.read(chatLLMProvider.notifier).sendMessage(message);
+          _scrollToBottom();
         },
       ),
     );
@@ -248,17 +196,67 @@ class _ChatScreenState extends State<ChatScreen> {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: message.isUser 
                           ? Colors.white 
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                          : message.isError
+                            ? Colors.red.shade700
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    _formatTime(message.timestamp),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: message.isUser 
-                          ? Colors.white.withOpacity(0.7)
-                          : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        _formatTime(message.timestamp),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: message.isUser 
+                              ? Colors.white.withOpacity(0.7)
+                              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
+                      ),
+                      if (!message.isUser && message.modelDisplayName.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: message.isUser 
+                                ? Colors.white.withOpacity(0.2)
+                                : message.modelColor.withOpacity(0.1),
+                            border: Border.all(
+                              color: message.isUser 
+                                  ? Colors.white.withOpacity(0.3)
+                                  : message.modelColor.withOpacity(0.5),
+                              width: 0.5,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: message.isUser 
+                                      ? Colors.white.withOpacity(0.8)
+                                      : message.modelColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                message.modelDisplayName,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: message.isUser 
+                                      ? Colors.white.withOpacity(0.8)
+                                      : message.modelColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -381,6 +379,92 @@ class _ChatScreenState extends State<ChatScreen> {
     return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 
+  Widget _buildStatusText() {
+    final chatState = ref.watch(chatLLMProvider);
+    final chatNotifier = ref.read(chatLLMProvider.notifier);
+    final status = chatNotifier.getLLMStatus();
+    
+    String statusText = '온라인';
+    Color statusColor = Colors.green;
+    
+    if (chatState.isLoading) {
+      statusText = '응답 중...';
+      statusColor = Colors.blue;
+    } else if (!status['isOnline']) {
+      statusText = '오프라인 모드';
+      statusColor = Colors.orange;
+    } else {
+      // Show preferred model in status
+      if (status['gemmaAvailable']) {
+        statusText = 'Gemma3 사용 가능';
+        statusColor = const Color(0xFF4CAF50);
+      } else if (status['exaoneAvailable']) {
+        statusText = 'EXAONE 사용 가능';
+        statusColor = const Color(0xFF2196F3);
+      } else {
+        statusText = 'GPT-4o 모드';
+        statusColor = const Color(0xFFFF9800);
+      }
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          statusText,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: statusColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        border: Border.all(color: Colors.red.shade200),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '연결에 문제가 발생했습니다. 다시 시도해 주세요.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.red.shade700,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(chatLLMProvider.notifier).clearError();
+            },
+            child: Text(
+              '닫기',
+              style: TextStyle(color: Colors.red.shade600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showChatOptions() {
     showModalBottomSheet(
       context: context,
@@ -401,10 +485,7 @@ class _ChatScreenState extends State<ChatScreen> {
               title: const Text('대화 내용 삭제'),
               onTap: () {
                 Navigator.pop(context);
-                setState(() {
-                  _messages.clear();
-                  _addWelcomeMessage();
-                });
+                ref.read(chatLLMProvider.notifier).clearMessages();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('대화 내용이 삭제되었습니다')),
                 );
@@ -415,9 +496,7 @@ class _ChatScreenState extends State<ChatScreen> {
               title: const Text('AI 설정'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('AI 설정 기능 준비 중입니다')),
-                );
+                _showLLMSettings();
               },
             ),
             ListTile(
@@ -435,17 +514,185 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-}
 
-class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
+  void _showLLMSettings() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'AI 모드 설정',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // LLM Mode Selection
+            Consumer(
+              builder: (context, ref, child) {
+                final chatNotifier = ref.read(chatLLMProvider.notifier);
+                final status = chatNotifier.getLLMStatus();
+                final currentMode = status['mode'] as LLMMode;
+                
+                return Column(
+                  children: [
+                    RadioListTile<LLMMode>(
+                      title: const Text('하이브리드 모드'),
+                      subtitle: const Text('상황에 따라 최적의 모델 자동 선택'),
+                      value: LLMMode.hybrid,
+                      groupValue: currentMode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref.read(chatLLMProvider.notifier).setLLMMode(value);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('하이브리드 모드로 설정되었습니다')),
+                          );
+                        }
+                      },
+                    ),
+                    RadioListTile<LLMMode>(
+                      title: const Text('온라인 모드'),
+                      subtitle: const Text('클라우드 AI (GPT-4o) 사용'),
+                      value: LLMMode.online,
+                      groupValue: currentMode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref.read(chatLLMProvider.notifier).setLLMMode(value);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('온라인 모드로 설정되었습니다')),
+                          );
+                        }
+                      },
+                    ),
+                    RadioListTile<LLMMode>(
+                      title: const Text('오프라인 모드'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('로컬 AI 사용'),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                status['gemmaAvailable'] ? Icons.check_circle : Icons.cancel,
+                                size: 16,
+                                color: status['gemmaAvailable'] ? const Color(0xFF4CAF50) : Colors.red,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Gemma3 ${status['gemmaAvailable'] ? '사용 가능' : '다운로드 필요'}',
+                                style: TextStyle(
+                                  color: status['gemmaAvailable'] ? const Color(0xFF4CAF50) : Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Icon(
+                                status['exaoneAvailable'] ? Icons.check_circle : Icons.cancel,
+                                size: 16,
+                                color: status['exaoneAvailable'] ? const Color(0xFF2196F3) : Colors.red,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'EXAONE ${status['exaoneAvailable'] ? '사용 가능' : '다운로드 필요'}',
+                                style: TextStyle(
+                                  color: status['exaoneAvailable'] ? const Color(0xFF2196F3) : Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      value: LLMMode.offline,
+                      groupValue: currentMode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          if (!status['gemmaAvailable'] && !status['exaoneAvailable']) {
+                            _showModelDownloadDialog();
+                            return;
+                          }
+                          ref.read(chatLLMProvider.notifier).setLLMMode(value);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('오프라인 모드로 설정되었습니다')),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-  });
+  void _showModelDownloadDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('오프라인 모델 다운로드'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('오프라인 모드를 사용하려면 로컬 AI 모델을 다운로드해야 합니다.'),
+            const SizedBox(height: 16),
+            const Text(
+              '권장 모델: Gemma3 (한국어 및 건강 상담에 최적화)',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '터미널에서 다음 명령어를 실행하세요:',
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: const Text(
+                'dart run scripts/model_downloader_cli.dart gemma',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('모델 다운로드 후 다시 시도해주세요.'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 

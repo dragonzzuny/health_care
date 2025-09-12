@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/vision/detector.dart';
-import '../../../core/vision/yolo_view_detector.dart';
+// import '../../../core/vision/yolo_view_detector.dart'; // Temporarily disabled
 import '../../../core/vision/mock_detector.dart';
 import '../../food/services/nutrition_repository.dart';
 import '../../../core/vision/detection.dart';
@@ -53,7 +53,8 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
 
   Future<void> _initializeDetector() async {
     try {
-      _detector = YoloViewDetector(modelPath: 'yolo11n');
+      // _detector = YoloViewDetector(modelPath: 'yolo11n'); // Temporarily disabled
+      _detector = MockDetector(); // Use mock detector for now
       await _detector.load();
     } catch (_) {
       _detector = MockDetector();
