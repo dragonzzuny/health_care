@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
 import 'dart:io';
-import 'dart:convert';
 
 class RecognitionRepository {
   final AppDatabase _db;
@@ -17,15 +16,15 @@ class RecognitionRepository {
     double? processingTimeMs,
   }) async {
     return await _db.into(_db.recognitionHistories).insert(
-      RecognitionHistoriesCompanion(
-        userId: Value(userId),
-        imagePath: Value(imagePath),
-        imageHash: Value(imageHash),
-        modelVersion: Value(modelVersion),
-        processingTimeMs: Value(processingTimeMs),
-        status: const Value('pending'),
-      ),
-    );
+          RecognitionHistoriesCompanion(
+            userId: Value(userId),
+            imagePath: Value(imagePath),
+            imageHash: Value(imageHash),
+            modelVersion: Value(modelVersion),
+            processingTimeMs: Value(processingTimeMs),
+            status: const Value('pending'),
+          ),
+        );
   }
 
   /// 인식 결과 추가
@@ -42,19 +41,19 @@ class RecognitionRepository {
     String? portionEstimateMethod,
   }) async {
     return await _db.into(_db.recognitionResults).insert(
-      RecognitionResultsCompanion(
-        historyId: Value(historyId),
-        detectedLabel: Value(detectedLabel),
-        confidence: Value(confidence),
-        foodId: Value(foodId),
-        boundingBoxX: Value(boundingBoxX),
-        boundingBoxY: Value(boundingBoxY),
-        boundingBoxWidth: Value(boundingBoxWidth),
-        boundingBoxHeight: Value(boundingBoxHeight),
-        estimatedGrams: Value(estimatedGrams),
-        portionEstimateMethod: Value(portionEstimateMethod),
-      ),
-    );
+          RecognitionResultsCompanion(
+            historyId: Value(historyId),
+            detectedLabel: Value(detectedLabel),
+            confidence: Value(confidence),
+            foodId: Value(foodId),
+            boundingBoxX: Value(boundingBoxX),
+            boundingBoxY: Value(boundingBoxY),
+            boundingBoxWidth: Value(boundingBoxWidth),
+            boundingBoxHeight: Value(boundingBoxHeight),
+            estimatedGrams: Value(estimatedGrams),
+            portionEstimateMethod: Value(portionEstimateMethod),
+          ),
+        );
   }
 
   /// 인식 이력 상태 업데이트
@@ -66,10 +65,10 @@ class RecognitionRepository {
     final updated = await (_db.update(_db.recognitionHistories)
           ..where((rh) => rh.id.equals(historyId)))
         .write(RecognitionHistoriesCompanion(
-          status: Value(status),
-          errorMessage: Value(errorMessage),
-          updatedAt: Value(DateTime.now()),
-        ));
+      status: Value(status),
+      errorMessage: Value(errorMessage),
+      updatedAt: Value(DateTime.now()),
+    ));
     return updated > 0;
   }
 
@@ -85,25 +84,25 @@ class RecognitionRepository {
       await (_db.update(_db.recognitionHistories)
             ..where((rh) => rh.id.equals(historyId)))
           .write(RecognitionHistoriesCompanion(
-            userConfirmed: Value(userConfirmed),
-            userCorrected: Value(userCorrected),
-            status: const Value('confirmed'),
-            updatedAt: Value(DateTime.now()),
-          ));
+        userConfirmed: Value(userConfirmed),
+        userCorrected: Value(userCorrected),
+        status: const Value('confirmed'),
+        updatedAt: Value(DateTime.now()),
+      ));
 
       // 수정 사항이 있다면 적용
       if (corrections != null && corrections.isNotEmpty) {
         for (final entry in corrections.entries) {
           final resultId = entry.key;
           final correction = entry.value;
-          
+
           await (_db.update(_db.recognitionResults)
                 ..where((rr) => rr.id.equals(resultId)))
               .write(RecognitionResultsCompanion(
-                correctedFoodId: Value(correction.correctedFoodId),
-                correctedGrams: Value(correction.correctedGrams),
-                userNotes: Value(correction.userNotes),
-              ));
+            correctedFoodId: Value(correction.correctedFoodId),
+            correctedGrams: Value(correction.correctedGrams),
+            userNotes: Value(correction.userNotes),
+          ));
         }
       }
 
@@ -120,7 +119,10 @@ class RecognitionRepository {
     // 먼저 이력들을 조회
     final histories = await (_db.select(_db.recognitionHistories)
           ..where((rh) => rh.userId.equals(userId))
-          ..orderBy([(rh) => OrderingTerm(expression: rh.recognizedAt, mode: OrderingMode.desc)])
+          ..orderBy([
+            (rh) => OrderingTerm(
+                expression: rh.recognizedAt, mode: OrderingMode.desc)
+          ])
           ..limit(limit, offset: offset))
         .get();
 
@@ -138,7 +140,8 @@ class RecognitionRepository {
   }
 
   /// 특정 이력의 인식 결과 조회
-  Future<List<RecognitionResultWithFood>> getRecognitionResults(int historyId) async {
+  Future<List<RecognitionResultWithFood>> getRecognitionResults(
+      int historyId) async {
     final query = _db.select(_db.recognitionResults).join([
       leftOuterJoin(
         _db.foods,
@@ -146,13 +149,19 @@ class RecognitionRepository {
       )
     ])
       ..where(_db.recognitionResults.historyId.equals(historyId))
-      ..orderBy([OrderingTerm(expression: _db.recognitionResults.confidence, mode: OrderingMode.desc)]);
+      ..orderBy([
+        OrderingTerm(
+            expression: _db.recognitionResults.confidence,
+            mode: OrderingMode.desc)
+      ]);
 
     final results = await query.get();
-    return results.map((row) => RecognitionResultWithFood(
-      result: row.readTable(_db.recognitionResults),
-      food: row.readTableOrNull(_db.foods),
-    )).toList();
+    return results
+        .map((row) => RecognitionResultWithFood(
+              result: row.readTable(_db.recognitionResults),
+              food: row.readTableOrNull(_db.foods),
+            ))
+        .toList();
   }
 
   /// 특정 날짜의 인식 이력 조회
@@ -164,11 +173,14 @@ class RecognitionRepository {
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     final histories = await (_db.select(_db.recognitionHistories)
-          ..where((rh) => 
-            rh.userId.equals(userId) & 
-            rh.recognizedAt.isBiggerOrEqualValue(startOfDay) & 
-            rh.recognizedAt.isSmallerThanValue(endOfDay))
-          ..orderBy([(rh) => OrderingTerm(expression: rh.recognizedAt, mode: OrderingMode.desc)]))
+          ..where((rh) =>
+              rh.userId.equals(userId) &
+              rh.recognizedAt.isBiggerOrEqualValue(startOfDay) &
+              rh.recognizedAt.isSmallerThanValue(endOfDay))
+          ..orderBy([
+            (rh) => OrderingTerm(
+                expression: rh.recognizedAt, mode: OrderingMode.desc)
+          ]))
         .get();
 
     final result = <RecognitionHistoryWithResults>[];
@@ -196,18 +208,18 @@ class RecognitionRepository {
     String? imageIssues,
   }) async {
     return await _db.into(_db.recognitionFeedbacks).insert(
-      RecognitionFeedbacksCompanion(
-        resultId: Value(resultId),
-        userId: Value(userId),
-        feedbackType: Value(feedbackType),
-        correctnessScore: Value(correctnessScore),
-        correctFoodName: Value(correctFoodName),
-        actualGrams: Value(actualGrams),
-        comments: Value(comments),
-        imageQualityScore: Value(imageQualityScore),
-        imageIssues: Value(imageIssues),
-      ),
-    );
+          RecognitionFeedbacksCompanion(
+            resultId: Value(resultId),
+            userId: Value(userId),
+            feedbackType: Value(feedbackType),
+            correctnessScore: Value(correctnessScore),
+            correctFoodName: Value(correctFoodName),
+            actualGrams: Value(actualGrams),
+            comments: Value(comments),
+            imageQualityScore: Value(imageQualityScore),
+            imageIssues: Value(imageIssues),
+          ),
+        );
   }
 
   /// 인식 성능 통계 조회
@@ -229,27 +241,33 @@ class RecognitionRepository {
       LEFT JOIN recognition_results rr ON rh.id = rr.history_id
       WHERE rh.user_id = ?
     ''';
-    
+
     final params = <dynamic>[userId];
-    
+
     if (startDate != null) {
       query += ' AND rh.recognized_at >= ?';
       params.add(startDate);
     }
-    
+
     if (endDate != null) {
       query += ' AND rh.recognized_at <= ?';
       params.add(endDate);
     }
 
-    final result = await _db.customSelect(query, variables: params.map((p) => Variable.withString(p.toString())).toList()).getSingle();
-    
+    final result = await _db
+        .customSelect(query,
+            variables:
+                params.map((p) => Variable.withString(p.toString())).toList())
+        .getSingle();
+
     return RecognitionStatistics(
       totalRecognitions: result.data['total_recognitions'] as int,
-      averageConfidence: (result.data['avg_confidence'] as num?)?.toDouble() ?? 0,
+      averageConfidence:
+          (result.data['avg_confidence'] as num?)?.toDouble() ?? 0,
       confirmedCount: result.data['confirmed_count'] as int,
       correctedCount: result.data['corrected_count'] as int,
-      averageProcessingTime: (result.data['avg_processing_time'] as num?)?.toDouble(),
+      averageProcessingTime:
+          (result.data['avg_processing_time'] as num?)?.toDouble(),
       successCount: result.data['success_count'] as int,
       failedCount: result.data['failed_count'] as int,
     );
@@ -273,19 +291,19 @@ class RecognitionRepository {
       LEFT JOIN foods f ON rr.food_id = f.id
       WHERE rh.user_id = ? AND rr.food_id IS NOT NULL
     ''';
-    
+
     final params = <dynamic>[userId];
-    
+
     if (startDate != null) {
       query += ' AND rh.recognized_at >= ?';
       params.add(startDate);
     }
-    
+
     if (endDate != null) {
       query += ' AND rh.recognized_at <= ?';
       params.add(endDate);
     }
-    
+
     query += '''
       GROUP BY f.id, f.name_ko
       ORDER BY recognition_count DESC
@@ -293,24 +311,30 @@ class RecognitionRepository {
     ''';
     params.add(limit);
 
-    final results = await _db.customSelect(query, variables: params.map((p) => Variable.withString(p.toString())).toList()).get();
-    
-    return results.map((row) => FoodRecognitionFrequency(
-      foodId: row.data['food_id'] as int,
-      foodName: row.data['food_name'] as String,
-      recognitionCount: row.data['recognition_count'] as int,
-      averageConfidence: (row.data['avg_confidence'] as num).toDouble(),
-    )).toList();
+    final results = await _db
+        .customSelect(query,
+            variables:
+                params.map((p) => Variable.withString(p.toString())).toList())
+        .get();
+
+    return results
+        .map((row) => FoodRecognitionFrequency(
+              foodId: row.data['food_id'] as int,
+              foodName: row.data['food_name'] as String,
+              recognitionCount: row.data['recognition_count'] as int,
+              averageConfidence: (row.data['avg_confidence'] as num).toDouble(),
+            ))
+        .toList();
   }
 
   /// 이미지 파일 정리 (오래된 이미지 삭제)
   Future<int> cleanupOldImages({int daysToKeep = 30}) async {
     final cutoffDate = DateTime.now().subtract(Duration(days: daysToKeep));
-    
+
     final oldHistories = await (_db.select(_db.recognitionHistories)
-          ..where((rh) => 
-            rh.recognizedAt.isSmallerThanValue(cutoffDate) & 
-            rh.status.equals('completed')))
+          ..where((rh) =>
+              rh.recognizedAt.isSmallerThanValue(cutoffDate) &
+              rh.status.equals('completed')))
         .get();
 
     int deletedCount = 0;
@@ -334,7 +358,10 @@ class RecognitionRepository {
   Future<RecognitionHistory?> findDuplicateImage(String imageHash) async {
     return await (_db.select(_db.recognitionHistories)
           ..where((rh) => rh.imageHash.equals(imageHash))
-          ..orderBy([(rh) => OrderingTerm(expression: rh.recognizedAt, mode: OrderingMode.desc)])
+          ..orderBy([
+            (rh) => OrderingTerm(
+                expression: rh.recognizedAt, mode: OrderingMode.desc)
+          ])
           ..limit(1))
         .getSingleOrNull();
   }
@@ -366,15 +393,17 @@ class RecognitionHistoryWithResults {
   /// 가장 높은 신뢰도의 결과
   RecognitionResultWithFood? get topResult {
     if (results.isEmpty) return null;
-    return results.reduce((a, b) => a.result.confidence > b.result.confidence ? a : b);
+    return results
+        .reduce((a, b) => a.result.confidence > b.result.confidence ? a : b);
   }
 
   /// 확정된 결과들 (사용자가 수정했거나 확인한 것들)
   List<RecognitionResultWithFood> get confirmedResults {
-    return results.where((r) => 
-      r.result.correctedFoodId != null || 
-      (history.userConfirmed && r.result.foodId != null)
-    ).toList();
+    return results
+        .where((r) =>
+            r.result.correctedFoodId != null ||
+            (history.userConfirmed && r.result.foodId != null))
+        .toList();
   }
 }
 
@@ -395,7 +424,8 @@ class RecognitionResultWithFood {
   double? get finalGrams => result.correctedGrams ?? result.estimatedGrams;
 
   /// 사용자가 수정했는지 여부
-  bool get isUserCorrected => result.correctedFoodId != null || result.correctedGrams != null;
+  bool get isUserCorrected =>
+      result.correctedFoodId != null || result.correctedGrams != null;
 }
 
 /// 인식 성능 통계 클래스
@@ -419,13 +449,16 @@ class RecognitionStatistics {
   });
 
   /// 성공률
-  double get successRate => totalRecognitions > 0 ? successCount / totalRecognitions : 0;
+  double get successRate =>
+      totalRecognitions > 0 ? successCount / totalRecognitions : 0;
 
   /// 확인률
-  double get confirmationRate => totalRecognitions > 0 ? confirmedCount / totalRecognitions : 0;
+  double get confirmationRate =>
+      totalRecognitions > 0 ? confirmedCount / totalRecognitions : 0;
 
   /// 수정률
-  double get correctionRate => confirmedCount > 0 ? correctedCount / confirmedCount : 0;
+  double get correctionRate =>
+      confirmedCount > 0 ? correctedCount / confirmedCount : 0;
 }
 
 /// 음식별 인식 빈도 클래스

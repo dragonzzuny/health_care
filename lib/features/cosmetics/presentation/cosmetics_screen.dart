@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 // ML Kit dependency removed - using mock implementation
-import 'dart:io';
 
 class CosmeticsScreen extends ConsumerStatefulWidget {
   const CosmeticsScreen({super.key});
@@ -14,9 +13,9 @@ class CosmeticsScreen extends ConsumerStatefulWidget {
 class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
   final ImagePicker _picker = ImagePicker();
   // ML Kit removed - using mock implementation
-  
-  List<CosmeticProduct> _products = [];
-  List<String> _userAllergies = ['파라벤', '황산염', '인공향료'];
+
+  final List<CosmeticProduct> _products = [];
+  final List<String> _userAllergies = ['파라벤', '황산염', '인공향료'];
   bool _isProcessing = false;
 
   @override
@@ -53,7 +52,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
   Future<void> _processMockIngredients(String imagePath) async {
     // Simulate processing delay
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // Mock ingredient extraction - in production, use actual OCR service
     final mockText = "Water, Glycerin, Niacinamide, Hyaluronic Acid";
     await _processIngredients(mockText);
@@ -62,7 +61,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
   Future<void> _processIngredients(String text) async {
     final ingredients = await _extractIngredients(text);
     final allergyAnalysis = _analyzeAllergies(ingredients);
-    
+
     final product = CosmeticProduct(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: _extractProductName(text) ?? '스캔된 제품',
@@ -86,30 +85,39 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
   Future<List<String>> _extractIngredients(String text) async {
     // Simulate ingredient extraction from OCR text
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Common cosmetic ingredients for demo
     final commonIngredients = [
-      'Water', 'Glycerin', 'Dimethicone', 'Cetyl Alcohol', 'Stearyl Alcohol',
-      'Sodium Lauryl Sulfate', 'Parabens', 'Fragrance', 'Phenoxyethanol',
-      'Tocopherol', 'Hyaluronic Acid', 'Niacinamide', 'Retinol'
+      'Water',
+      'Glycerin',
+      'Dimethicone',
+      'Cetyl Alcohol',
+      'Stearyl Alcohol',
+      'Sodium Lauryl Sulfate',
+      'Parabens',
+      'Fragrance',
+      'Phenoxyethanol',
+      'Tocopherol',
+      'Hyaluronic Acid',
+      'Niacinamide',
+      'Retinol'
     ];
-    
+
     final extractedIngredients = <String>[];
     final lowerText = text.toLowerCase();
-    
+
     for (final ingredient in commonIngredients) {
       if (lowerText.contains(ingredient.toLowerCase())) {
         extractedIngredients.add(ingredient);
       }
     }
-    
+
     // Add some random ingredients for demo
     if (extractedIngredients.isEmpty) {
-      extractedIngredients.addAll([
-        'Water', 'Glycerin', 'Dimethicone', 'Fragrance'
-      ]);
+      extractedIngredients
+          .addAll(['Water', 'Glycerin', 'Dimethicone', 'Fragrance']);
     }
-    
+
     return extractedIngredients;
   }
 
@@ -117,8 +125,9 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
     // Simple product name extraction
     final lines = text.split('\n');
     for (final line in lines) {
-      if (line.length > 5 && line.length < 50 && 
-          !line.contains('ingredients') && 
+      if (line.length > 5 &&
+          line.length < 50 &&
+          !line.contains('ingredients') &&
           !line.contains('성분')) {
         return line.trim();
       }
@@ -130,7 +139,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
     // Common cosmetic brands for demo
     final brands = ['로레알', '랑콤', '에스티로더', '클리니크', '맥', '메이블린'];
     final lowerText = text.toLowerCase();
-    
+
     for (final brand in brands) {
       if (lowerText.contains(brand.toLowerCase())) {
         return brand;
@@ -142,7 +151,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
   AllergyAnalysis _analyzeAllergies(List<String> ingredients) {
     final riskyIngredients = <String>[];
     final warnings = <String>[];
-    
+
     for (final ingredient in ingredients) {
       for (final allergy in _userAllergies) {
         if (ingredient.toLowerCase().contains(allergy.toLowerCase()) ||
@@ -152,7 +161,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
         }
       }
     }
-    
+
     return AllergyAnalysis(
       hasRisk: riskyIngredients.isNotEmpty,
       riskyIngredients: riskyIngredients,
@@ -167,10 +176,10 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
       '황산염': ['sodium lauryl sulfate', 'sodium laureth sulfate'],
       '인공향료': ['fragrance', 'parfum', 'perfume'],
     };
-    
+
     final relatedIngredients = relations[allergy] ?? [];
-    return relatedIngredients.any((related) => 
-        ingredient.toLowerCase().contains(related.toLowerCase()));
+    return relatedIngredients.any(
+        (related) => ingredient.toLowerCase().contains(related.toLowerCase()));
   }
 
   RiskLevel _calculateRiskLevel(int riskyCount) {
@@ -204,15 +213,15 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
             ),
             const SizedBox(height: 12),
             ...analysis.warnings.map((warning) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('• '),
-                  Expanded(child: Text(warning)),
-                ],
-              ),
-            )),
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('• '),
+                      Expanded(child: Text(warning)),
+                    ],
+                  ),
+                )),
           ],
         ),
         actions: [
@@ -276,7 +285,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
               onPressed: _isProcessing ? null : _scanCosmetic,
-              icon: _isProcessing 
+              icon: _isProcessing
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -289,7 +298,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
               ),
             ),
           ),
-          
+
           // User Allergies
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -308,9 +317,10 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '내 알레르기 정보',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -318,22 +328,28 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 4,
-                      children: _userAllergies.map((allergy) => Chip(
-                        label: Text(allergy),
-                        backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                        labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
-                      )).toList(),
+                      children: _userAllergies
+                          .map((allergy) => Chip(
+                                label: Text(allergy),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .errorContainer,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onErrorContainer,
+                                ),
+                              ))
+                          .toList(),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Products List
           Expanded(
             child: _products.isEmpty
@@ -349,16 +365,22 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                         const SizedBox(height: 16),
                         Text(
                           '분석된 제품이 없습니다',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '화장품 성분표를 스캔해보세요',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                       ],
                     ),
@@ -394,23 +416,25 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                       Text(
                         product.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         product.brand,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getRiskColor(product.allergyRisk.riskLevel).withOpacity(0.1),
+                    color: _getRiskColor(product.allergyRisk.riskLevel)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _getRiskColor(product.allergyRisk.riskLevel),
@@ -428,7 +452,7 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             // Risk warnings
             if (product.allergyRisk.hasRisk) ...[
               Container(
@@ -447,29 +471,31 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '알레르기 위험 성분',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     ...product.allergyRisk.warnings.map((warning) => Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        '• $warning',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                    )),
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            '• $warning',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.red.shade700,
+                                    ),
+                          ),
+                        )),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
             ],
-            
+
             // Ingredients
             ExpansionTile(
               title: Text(
@@ -483,15 +509,18 @@ class _CosmeticsScreenState extends ConsumerState<CosmeticsScreen> {
                     spacing: 8,
                     runSpacing: 4,
                     children: product.ingredients.map((ingredient) {
-                      final isRisky = product.allergyRisk.riskyIngredients.contains(ingredient);
+                      final isRisky = product.allergyRisk.riskyIngredients
+                          .contains(ingredient);
                       return Chip(
                         label: Text(ingredient),
-                        backgroundColor: isRisky 
+                        backgroundColor: isRisky
                             ? Colors.red.withOpacity(0.1)
-                            : Theme.of(context).colorScheme.surfaceContainerHighest,
+                            : Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                         labelStyle: TextStyle(
-                          color: isRisky 
-                              ? Colors.red 
+                          color: isRisky
+                              ? Colors.red
                               : Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 12,
                         ),
@@ -570,4 +599,3 @@ class CosmeticProduct {
     required this.scanDate,
   });
 }
-

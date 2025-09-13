@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../providers/report_providers.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
@@ -11,9 +10,10 @@ class ReportScreen extends ConsumerStatefulWidget {
   ConsumerState<ReportScreen> createState() => _ReportScreenState();
 }
 
-class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProviderStateMixin {
+class _ReportScreenState extends ConsumerState<ReportScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +65,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildActivityReport() {
     final activityReport = ref.watch(weeklyActivityReportProvider);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -76,21 +76,21 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               '이번 주 활동 요약',
               [
                 _buildSummaryItem(
-                  '평균 걸음 수', 
-                  _formatNumber(report['avgSteps']), 
-                  '목표 대비 ${(report['stepsProgress'] * 100).round()}%', 
+                  '평균 걸음 수',
+                  _formatNumber(report['avgSteps']),
+                  '목표 대비 ${(report['stepsProgress'] * 100).round()}%',
                   Colors.blue,
                 ),
                 _buildSummaryItem(
-                  '총 운동 시간', 
-                  '${_formatDuration(report['totalActiveMinutes'])}', 
-                  '목표 대비 ${(report['activeMinutesProgress'] * 100).round()}%', 
+                  '총 운동 시간',
+                  _formatDuration(report['totalActiveMinutes']),
+                  '목표 대비 ${(report['activeMinutesProgress'] * 100).round()}%',
                   Colors.green,
                 ),
                 _buildSummaryItem(
-                  '소모 칼로리', 
-                  '${_formatNumber(report['totalCalories'])} kcal', 
-                  '목표 대비 ${(report['caloriesProgress'] * 100).round()}%', 
+                  '소모 칼로리',
+                  '${_formatNumber(report['totalCalories'])} kcal',
+                  '목표 대비 ${(report['caloriesProgress'] * 100).round()}%',
                   Colors.orange,
                 ),
               ],
@@ -99,7 +99,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             error: (_, __) => _buildErrorSummaryCard('이번 주 활동 요약'),
           ),
           const SizedBox(height: 16),
-          
           activityReport.when(
             data: (report) => _buildChartCard(
               '일별 걸음 수',
@@ -110,27 +109,32 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     gridData: const FlGridData(show: true),
                     titlesData: FlTitlesData(
                       leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+                        sideTitles:
+                            SideTitles(showTitles: true, reservedSize: 40),
                       ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             const days = ['월', '화', '수', '목', '금', '토', '일'];
-                            if (value.toInt() >= 0 && value.toInt() < days.length) {
+                            if (value.toInt() >= 0 &&
+                                value.toInt() < days.length) {
                               return Text(days[value.toInt()]);
                             }
                             return const Text('');
                           },
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(show: true),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: _generateStepsChartSpots(report['dailyStepsData']),
+                        spots:
+                            _generateStepsChartSpots(report['dailyStepsData']),
                         isCurved: true,
                         color: Colors.blue,
                         barWidth: 3,
@@ -145,11 +149,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             error: (_, __) => _buildErrorChart('일별 걸음 수'),
           ),
           const SizedBox(height: 16),
-          
           Consumer(
             builder: (context, ref, child) {
-              final workoutDistribution = ref.watch(workoutTypeDistributionProvider);
-              
+              final workoutDistribution =
+                  ref.watch(workoutTypeDistributionProvider);
+
               return workoutDistribution.when(
                 data: (distribution) => _buildChartCard(
                   '운동 유형별 분포',
@@ -157,7 +161,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     height: 200,
                     child: PieChart(
                       PieChartData(
-                        sections: _generateWorkoutPieChartSections(distribution),
+                        sections:
+                            _generateWorkoutPieChartSections(distribution),
                         centerSpaceRadius: 40,
                       ),
                     ),
@@ -175,7 +180,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildNutritionReport() {
     final nutritionReport = ref.watch(weeklyNutritionReportProvider);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -186,21 +191,21 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               '이번 주 영양 요약',
               [
                 _buildSummaryItem(
-                  '평균 칼로리', 
-                  '${_formatNumber(report['avgCalories'])} kcal', 
-                  '목표 대비 ${(report['calorieProgress'] * 100).round()}%', 
+                  '평균 칼로리',
+                  '${_formatNumber(report['avgCalories'])} kcal',
+                  '목표 대비 ${(report['calorieProgress'] * 100).round()}%',
                   Colors.red,
                 ),
                 _buildSummaryItem(
-                  '단백질 섭취', 
-                  '${report['avgProtein']}g', 
-                  '목표 대비 ${(report['proteinProgress'] * 100).round()}%', 
+                  '단백질 섭취',
+                  '${report['avgProtein']}g',
+                  '목표 대비 ${(report['proteinProgress'] * 100).round()}%',
                   Colors.blue,
                 ),
                 _buildSummaryItem(
-                  '수분 섭취', 
-                  '${report['waterIntake']}L', 
-                  '목표 대비 ${(report['waterProgress'] * 100).round()}%', 
+                  '수분 섭취',
+                  '${report['waterIntake']}L',
+                  '목표 대비 ${(report['waterProgress'] * 100).round()}%',
                   Colors.cyan,
                 ),
               ],
@@ -209,7 +214,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             error: (_, __) => _buildErrorSummaryCard('이번 주 영양 요약'),
           ),
           const SizedBox(height: 16),
-          
           nutritionReport.when(
             data: (report) => _buildChartCard(
               '일별 칼로리 섭취',
@@ -221,25 +225,30 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     maxY: _getMaxCalorie(report['dailyCaloriesData']) * 1.2,
                     titlesData: FlTitlesData(
                       leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+                        sideTitles:
+                            SideTitles(showTitles: true, reservedSize: 40),
                       ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             const days = ['월', '화', '수', '목', '금', '토', '일'];
-                            if (value.toInt() >= 0 && value.toInt() < days.length) {
+                            if (value.toInt() >= 0 &&
+                                value.toInt() < days.length) {
                               return Text(days[value.toInt()]);
                             }
                             return const Text('');
                           },
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(show: true),
-                    barGroups: _generateCalorieBarChartGroups(report['dailyCaloriesData']),
+                    barGroups: _generateCalorieBarChartGroups(
+                        report['dailyCaloriesData']),
                   ),
                 ),
               ),
@@ -248,7 +257,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             error: (_, __) => _buildErrorChart('일별 칼로리 섭취'),
           ),
           const SizedBox(height: 16),
-          
           nutritionReport.when(
             data: (report) => _buildChartCard(
               '영양소 균형',
@@ -265,7 +273,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                       ),
                       PieChartSectionData(
                         value: (report['proteinRatio'] * 100),
-                        title: '단백질\n${(report['proteinRatio'] * 100).round()}%',
+                        title:
+                            '단백질\n${(report['proteinRatio'] * 100).round()}%',
                         color: Colors.red,
                         radius: 80,
                       ),
@@ -298,13 +307,13 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
           _buildSummaryCard(
             '이번 주 수면 요약',
             [
-              _buildSummaryItem('평균 수면 시간', '7시간 23분', '목표 대비 98%', Colors.indigo),
+              _buildSummaryItem(
+                  '평균 수면 시간', '7시간 23분', '목표 대비 98%', Colors.indigo),
               _buildSummaryItem('수면 효율성', '87%', '양호', Colors.green),
               _buildSummaryItem('깊은 잠 비율', '23%', '정상 범위', Colors.purple),
             ],
           ),
           const SizedBox(height: 16),
-          
           _buildChartCard(
             '일별 수면 시간',
             SizedBox(
@@ -314,22 +323,26 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                   gridData: const FlGridData(show: true),
                   titlesData: FlTitlesData(
                     leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+                      sideTitles:
+                          SideTitles(showTitles: true, reservedSize: 40),
                     ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
                           const days = ['월', '화', '수', '목', '금', '토', '일'];
-                          if (value.toInt() >= 0 && value.toInt() < days.length) {
+                          if (value.toInt() >= 0 &&
+                              value.toInt() < days.length) {
                             return Text(days[value.toInt()]);
                           }
                           return const Text('');
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
                   ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
@@ -378,7 +391,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildHealthScoreCard() {
     final healthScore = ref.watch(healthScoreProvider);
-    
+
     return healthScore.when(
       data: (score) => Card(
         child: Padding(
@@ -389,8 +402,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               Text(
                 '종합 건강 점수',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 20),
               Center(
@@ -403,7 +416,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                         value: score['overall'] / 100.0,
                         strokeWidth: 12,
                         backgroundColor: Colors.grey.shade300,
-                        valueColor: AlwaysStoppedAnimation<Color>(_getScoreColor(score['overall'])),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            _getScoreColor(score['overall'])),
                       ),
                       Center(
                         child: Column(
@@ -411,16 +425,22 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                           children: [
                             Text(
                               '${score['overall']}',
-                              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: _getScoreColor(score['overall']),
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displayMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: _getScoreColor(score['overall']),
+                                  ),
                             ),
                             Text(
                               '점',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: _getScoreColor(score['overall']),
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: _getScoreColor(score['overall']),
+                                  ),
                             ),
                           ],
                         ),
@@ -453,9 +473,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
         Text(
           '$score',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
         ),
         Text(
           label,
@@ -467,7 +487,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildAIInsightsCard() {
     final aiInsights = ref.watch(aiInsightsProvider);
-    
+
     return aiInsights.when(
       data: (insights) => Card(
         child: Padding(
@@ -485,17 +505,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                   Text(
                     'AI 인사이트',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              
               ...insights.asMap().entries.map((entry) {
                 final index = entry.key;
                 final insight = entry.value;
-                
+
                 return Column(
                   children: [
                     if (index > 0) const SizedBox(height: 12),
@@ -507,7 +526,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     ),
                   ],
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -517,7 +536,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
     );
   }
 
-  Widget _buildInsightItem(String title, String description, IconData icon, Color color) {
+  Widget _buildInsightItem(
+      String title, String description, IconData icon, Color color) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -530,8 +550,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -547,7 +567,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildGoalProgressCard() {
     final goalAchievement = ref.watch(goalAchievementProvider);
-    
+
     return goalAchievement.when(
       data: (goals) => Card(
         child: Padding(
@@ -558,15 +578,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               Text(
                 '목표 달성률',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
-              
               ...goals.asMap().entries.map((entry) {
                 final index = entry.key;
                 final goal = entry.value;
-                
+
                 return Column(
                   children: [
                     if (index > 0) const SizedBox(height: 12),
@@ -577,7 +596,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     ),
                   ],
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -597,15 +616,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
             Text(
               '${(progress * 100).toInt()}%',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: progress >= 0.9 ? Colors.green : Colors.orange,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: progress >= 0.9 ? Colors.green : Colors.orange,
+                  ),
             ),
           ],
         ),
@@ -621,8 +640,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
         Text(
           detail,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );
@@ -630,7 +649,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
 
   Widget _buildRecommendationsCard() {
     final recommendations = ref.watch(recommendationsProvider);
-    
+
     return recommendations.when(
       data: (recs) => Card(
         child: Padding(
@@ -641,15 +660,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               Text(
                 '개인 맞춤 권장사항',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
-              
               ...recs.asMap().entries.map((entry) {
                 final index = entry.key;
                 final rec = entry.value;
-                
+
                 return Column(
                   children: [
                     if (index > 0) const SizedBox(height: 12),
@@ -661,7 +679,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                     ),
                   ],
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -671,7 +689,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
     );
   }
 
-  Widget _buildRecommendationItem(String category, String recommendation, IconData icon, Color color) {
+  Widget _buildRecommendationItem(
+      String category, String recommendation, IconData icon, Color color) {
     return Row(
       children: [
         Container(
@@ -690,9 +709,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
               Text(
                 category,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
               ),
               Text(
                 recommendation,
@@ -715,8 +734,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             ...items,
@@ -726,7 +745,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
     );
   }
 
-  Widget _buildSummaryItem(String label, String value, String subtitle, Color color) {
+  Widget _buildSummaryItem(
+      String label, String value, String subtitle, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -747,20 +767,20 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                  ),
+                        color: color,
+                      ),
                 ),
               ],
             ),
@@ -780,8 +800,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             chart,
@@ -806,9 +826,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
     if (hours > 0) {
-      return '${hours}시간 ${mins}분';
+      return '$hours시간 $mins분';
     }
-    return '${mins}분';
+    return '$mins분';
   }
 
   /// 목표값 포매팅
@@ -832,25 +852,38 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
   /// 문자열을 아이콘으로 변환
   IconData _getIconFromString(String iconName) {
     switch (iconName) {
-      case 'fitness_center': return Icons.fitness_center;
-      case 'restaurant': return Icons.restaurant;
-      case 'bedtime': return Icons.bedtime;
-      case 'directions_walk': return Icons.directions_walk;
-      case 'water_drop': return Icons.water_drop;
-      default: return Icons.info;
+      case 'fitness_center':
+        return Icons.fitness_center;
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'bedtime':
+        return Icons.bedtime;
+      case 'directions_walk':
+        return Icons.directions_walk;
+      case 'water_drop':
+        return Icons.water_drop;
+      default:
+        return Icons.info;
     }
   }
 
   /// 문자열을 색상으로 변환
   Color _getColorFromString(String colorName) {
     switch (colorName) {
-      case 'blue': return Colors.blue;
-      case 'green': return Colors.green;
-      case 'orange': return Colors.orange;
-      case 'red': return Colors.red;
-      case 'indigo': return Colors.indigo;
-      case 'purple': return Colors.purple;
-      default: return Colors.grey;
+      case 'blue':
+        return Colors.blue;
+      case 'green':
+        return Colors.green;
+      case 'orange':
+        return Colors.orange;
+      case 'red':
+        return Colors.red;
+      case 'indigo':
+        return Colors.indigo;
+      case 'purple':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -862,14 +895,22 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
   }
 
   /// 운동 타입별 파이차트 섹션 생성
-  List<PieChartSectionData> _generateWorkoutPieChartSections(List<Map<String, dynamic>> distribution) {
-    final colors = [Colors.blue, Colors.green, Colors.purple, Colors.orange, Colors.red, Colors.cyan];
-    
+  List<PieChartSectionData> _generateWorkoutPieChartSections(
+      List<Map<String, dynamic>> distribution) {
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.purple,
+      Colors.orange,
+      Colors.red,
+      Colors.cyan
+    ];
+
     return distribution.asMap().entries.map((entry) {
       final index = entry.key;
       final item = entry.value;
       final color = colors[index % colors.length];
-      
+
       return PieChartSectionData(
         value: item['value'],
         title: '${item['type']}\n${item['value'].round()}%',
@@ -880,7 +921,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
   }
 
   /// 칼로리 바차트 그룹 생성
-  List<BarChartGroupData> _generateCalorieBarChartGroups(List<double> caloriesData) {
+  List<BarChartGroupData> _generateCalorieBarChartGroups(
+      List<double> caloriesData) {
     return caloriesData.asMap().entries.map((entry) {
       return BarChartGroupData(
         x: entry.key,
@@ -912,8 +954,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             const Center(child: CircularProgressIndicator()),
@@ -933,8 +975,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             const SizedBox(
@@ -957,8 +999,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '종합 건강 점수',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 20),
             const Center(child: CircularProgressIndicator()),
@@ -985,8 +1027,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                 Text(
                   'AI 인사이트',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -1008,8 +1050,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '목표 달성률',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             const Center(child: CircularProgressIndicator()),
@@ -1029,8 +1071,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '개인 맞춤 권장사항',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             const Center(child: CircularProgressIndicator()),
@@ -1052,8 +1094,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Center(
@@ -1084,8 +1126,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -1120,8 +1162,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '종합 건강 점수',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 20),
             Center(
@@ -1159,8 +1201,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
                 Text(
                   'AI 인사이트',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -1193,8 +1235,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '목표 달성률',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Center(
@@ -1225,8 +1267,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
             Text(
               '개인 맞춤 권장사항',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             Center(
@@ -1247,4 +1289,3 @@ class _ReportScreenState extends ConsumerState<ReportScreen> with TickerProvider
     );
   }
 }
-

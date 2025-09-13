@@ -76,7 +76,7 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
     ];
 
     // 음식 종류별 커스텀 프리셋 (예시)
-    if (foodName.toLowerCase().contains('rice') || 
+    if (foodName.toLowerCase().contains('rice') ||
         foodName.toLowerCase().contains('밥')) {
       presets[0] = presets[0].copyWith(
         label: '반 공기',
@@ -119,12 +119,13 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
               Text(
                 '분량 선택',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -132,9 +133,9 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
                 child: Text(
                   '${_currentGrams}g',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
               ),
             ],
@@ -149,8 +150,8 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
           Text(
             '빠른 선택',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 12),
           _buildPresetButtons(),
@@ -160,8 +161,8 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
           Text(
             '정밀 조절',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
           _buildPrecisionSlider(),
@@ -175,7 +176,7 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
   }
 
   Widget _buildVisualPortionGuide() {
-    return Container(
+    return SizedBox(
       height: 120,
       child: Stack(
         alignment: Alignment.center,
@@ -199,7 +200,7 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
                 ),
               ),
             ),
-          
+
           // 현재 선택된 크기 표시
           Center(
             child: AnimatedContainer(
@@ -239,7 +240,7 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
         final index = entry.key;
         final preset = entry.value;
         final isSelected = _selectedPresetIndex == index;
-        
+
         return GestureDetector(
           onTap: () {
             setState(() {
@@ -252,12 +253,15 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isSelected 
+              color: isSelected
                   ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                  : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                  : Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withOpacity(0.5),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected 
+                color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.outline.withOpacity(0.3),
                 width: isSelected ? 2 : 1,
@@ -269,19 +273,19 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
                 Text(
                   preset.label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected 
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
                 ),
                 Text(
                   '${preset.grams}g',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isSelected 
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -300,9 +304,11 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
             activeTrackColor: Theme.of(context).colorScheme.primary,
-            inactiveTrackColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            inactiveTrackColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.3),
             thumbColor: Theme.of(context).colorScheme.primary,
-            overlayColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            overlayColor:
+                Theme.of(context).colorScheme.primary.withOpacity(0.2),
           ),
           child: Slider(
             value: _currentGrams.toDouble(),
@@ -335,7 +341,7 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
   Widget _buildCalorieInfo() {
     // 대략적인 칼로리 계산 (실제로는 음식별 칼로리 데이터베이스 필요)
     final estimatedCalories = (_currentGrams * 2.5).round(); // 임시 계산
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -354,16 +360,16 @@ class _PortionInputWidgetState extends State<PortionInputWidget> {
             child: Text(
               '예상 칼로리',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
           Text(
-            '약 ${estimatedCalories} kcal',
+            '약 $estimatedCalories kcal',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.orange,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
           ),
         ],
       ),
@@ -446,15 +452,15 @@ class _FavoritePortionsWidgetState extends State<FavoritePortionsWidget> {
             Text(
               '즐겨찾는 분량이 없습니다',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               '자주 먹는 분량을 저장해보세요',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -475,8 +481,8 @@ class _FavoritePortionsWidgetState extends State<FavoritePortionsWidget> {
             Text(
               '자주 먹는 분량',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -488,7 +494,8 @@ class _FavoritePortionsWidgetState extends State<FavoritePortionsWidget> {
             return GestureDetector(
               onTap: () => widget.onPortionSelected?.call(grams),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -513,9 +520,9 @@ class _FavoritePortionsWidgetState extends State<FavoritePortionsWidget> {
                     Text(
                       '${grams}g',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.pink,
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.pink,
+                          ),
                     ),
                   ],
                 ),
