@@ -1,0 +1,237 @@
+{
+  "apple": {
+    "kcal_per_100g": 52,
+    "carbs_g": 14.0,
+    "protein_g": 0.3,
+    "fat_g": 0.2,
+    "fiber_g": 2.4,
+    "sugar_g": 10.4,
+    "sodium_mg": 1
+  },
+  "banana": {
+    "kcal_per_100g": 89,
+    "carbs_g": 23.0,
+    "protein_g": 1.1,
+    "fat_g": 0.3,
+    "fiber_g": 2.6,
+    "sugar_g": 12.2,
+    "sodium_mg": 1
+  },
+  "kimchi": {
+    "kcal_per_100g": 15,
+    "carbs_g": 2.4,
+    "protein_g": 1.1,
+    "fat_g": 0.5,
+    "fiber_g": 1.6,
+    "sugar_g": 1.3,
+    "sodium_mg": 498
+  },
+  "kimchi_jjigae": {
+    "kcal_per_100g": 19,
+    "carbs_g": 2.4,
+    "protein_g": 1.6,
+    "fat_g": 0.5,
+    "fiber_g": 1.8,
+    "sugar_g": 1.1,
+    "sodium_mg": 420
+  },
+  "doenjang_jjigae": {
+    "kcal_per_100g": 25,
+    "carbs_g": 3.2,
+    "protein_g": 2.1,
+    "fat_g": 0.8,
+    "fiber_g": 1.2,
+    "sugar_g": 1.5,
+    "sodium_mg": 580
+  },
+  "sundubu_jjigae": {
+    "kcal_per_100g": 45,
+    "carbs_g": 2.8,
+    "protein_g": 4.2,
+    "fat_g": 2.1,
+    "fiber_g": 0.8,
+    "sugar_g": 1.2,
+    "sodium_mg": 450
+  },
+  "white_rice": {
+    "kcal_per_100g": 130,
+    "carbs_g": 28.2,
+    "protein_g": 2.7,
+    "fat_g": 0.3,
+    "fiber_g": 0.4,
+    "sugar_g": 0.1,
+    "sodium_mg": 1
+  },
+  "brown_rice": {
+    "kcal_per_100g": 112,
+    "carbs_g": 23.0,
+    "protein_g": 2.6,
+    "fat_g": 0.9,
+    "fiber_g": 1.8,
+    "sugar_g": 0.4,
+    "sodium_mg": 5
+  },
+  "bibimbap": {
+    "kcal_per_100g": 169,
+    "carbs_g": 26.0,
+    "protein_g": 5.6,
+    "fat_g": 4.5,
+    "fiber_g": 2.8,
+    "sugar_g": 3.2,
+    "sodium_mg": 380
+  },
+  "bulgogi": {
+    "kcal_per_100g": 198,
+    "carbs_g": 8.4,
+    "protein_g": 18.2,
+    "fat_g": 10.1,
+    "fiber_g": 0.8,
+    "sugar_g": 6.2,
+    "sodium_mg": 520
+  },
+  "samgyeopsal": {
+    "kcal_per_100g": 518,
+    "carbs_g": 0.0,
+    "protein_g": 17.1,
+    "fat_g": 48.6,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "sodium_mg": 58
+  },
+  "japchae": {
+    "kcal_per_100g": 132,
+    "carbs_g": 20.8,
+    "protein_g": 2.4,
+    "fat_g": 4.2,
+    "fiber_g": 1.8,
+    "sugar_g": 4.8,
+    "sodium_mg": 420
+  },
+  "ramen": {
+    "kcal_per_100g": 436,
+    "carbs_g": 66.0,
+    "protein_g": 10.0,
+    "fat_g": 15.0,
+    "fiber_g": 3.0,
+    "sugar_g": 2.8,
+    "sodium_mg": 1820
+  },
+  "jjajangmyeon": {
+    "kcal_per_100g": 189,
+    "carbs_g": 28.4,
+    "protein_g": 6.8,
+    "fat_g": 5.4,
+    "fiber_g": 2.4,
+    "sugar_g": 6.2,
+    "sodium_mg": 580
+  },
+  "jjamppong": {
+    "kcal_per_100g": 145,
+    "carbs_g": 18.2,
+    "protein_g": 8.4,
+    "fat_g": 4.8,
+    "fiber_g": 1.8,
+    "sugar_g": 4.2,
+    "sodium_mg": 980
+  },
+  "udon": {
+    "kcal_per_100g": 95,
+    "carbs_g": 19.4,
+    "protein_g": 2.8,
+    "fat_g": 0.8,
+    "fiber_g": 1.2,
+    "sugar_g": 2.4,
+    "sodium_mg": 520
+  },
+  "tonkatsu": {
+    "kcal_per_100g": 272,
+    "carbs_g": 15.8,
+    "protein_g": 18.4,
+    "fat_g": 16.2,
+    "fiber_g": 1.2,
+    "sugar_g": 2.1,
+    "sodium_mg": 420
+  },
+  "chicken_breast": {
+    "kcal_per_100g": 165,
+    "carbs_g": 0.0,
+    "protein_g": 31.0,
+    "fat_g": 3.6,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "sodium_mg": 74
+  },
+  "salmon": {
+    "kcal_per_100g": 208,
+    "carbs_g": 0.0,
+    "protein_g": 22.1,
+    "fat_g": 12.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "sodium_mg": 59
+  },
+  "broccoli": {
+    "kcal_per_100g": 25,
+    "carbs_g": 5.0,
+    "protein_g": 2.6,
+    "fat_g": 0.4,
+    "fiber_g": 2.3,
+    "sugar_g": 1.2,
+    "sodium_mg": 41
+  },
+  "spinach": {
+    "kcal_per_100g": 23,
+    "carbs_g": 3.6,
+    "protein_g": 2.9,
+    "fat_g": 0.4,
+    "fiber_g": 2.2,
+    "sugar_g": 0.4,
+    "sodium_mg": 79
+  },
+  "egg": {
+    "kcal_per_100g": 155,
+    "carbs_g": 1.1,
+    "protein_g": 13.0,
+    "fat_g": 10.6,
+    "fiber_g": 0.0,
+    "sugar_g": 1.1,
+    "sodium_mg": 124
+  },
+  "bread": {
+    "kcal_per_100g": 265,
+    "carbs_g": 49.0,
+    "protein_g": 9.0,
+    "fat_g": 3.2,
+    "fiber_g": 2.7,
+    "sugar_g": 5.7,
+    "sodium_mg": 491
+  },
+  "almond": {
+    "kcal_per_100g": 579,
+    "carbs_g": 21.6,
+    "protein_g": 21.2,
+    "fat_g": 49.9,
+    "fiber_g": 12.5,
+    "sugar_g": 4.4,
+    "sodium_mg": 1
+  },
+  "orange": {
+    "kcal_per_100g": 43,
+    "carbs_g": 8.3,
+    "protein_g": 0.9,
+    "fat_g": 0.2,
+    "fiber_g": 2.2,
+    "sugar_g": 8.2,
+    "sodium_mg": 0
+  },
+  "strawberry": {
+    "kcal_per_100g": 32,
+    "carbs_g": 7.7,
+    "protein_g": 0.7,
+    "fat_g": 0.3,
+    "fiber_g": 2.0,
+    "sugar_g": 4.9,
+    "sodium_mg": 1
+  }
+}
+
