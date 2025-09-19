@@ -45,6 +45,8 @@ class ChatMessage {
         return 'EXAONE';
       case LLMModel.gpt4o:
         return 'GPT-4o';
+      case LLMModel.geminiFlash:
+        return 'Gemini Flash';
       case null:
         return '';
     }
@@ -59,6 +61,8 @@ class ChatMessage {
         return const Color(0xFF2196F3); // Blue for EXAONE (local)
       case LLMModel.gpt4o:
         return const Color(0xFFFF9800); // Orange for GPT-4o (cloud)
+      case LLMModel.geminiFlash:
+        return const Color(0xFF9C27B0); // Purple for Gemini Flash (cloud)
       case null:
         return const Color(0xFF757575); // Grey for unknown
     }

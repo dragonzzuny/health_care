@@ -3,10 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/services/data_initializer.dart';
+import 'core/config/app_config.dart';
 import 'shared/providers/database_providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize app configuration
+  await AppConfig.initialize();
+  
   runApp(const MyApp());
 }
 

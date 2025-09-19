@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_providers.dart';
 import '../models/chat_models.dart';
 import '../../../core/llm/llm_router.dart';
+import '../../../core/config/app_config.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -395,10 +396,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       statusColor = Colors.orange;
     } else {
       // Show preferred model in status
-      if (status['gemmaAvailable']) {
+      if (status['geminiAvailable'] == true) {
+        statusText = 'Gemini 사용 가능';
+        statusColor = const Color(0xFF7C4DFF);
+      } else if (status['gemmaAvailable'] == true) {
         statusText = 'Gemma3 사용 가능';
         statusColor = const Color(0xFF4CAF50);
-      } else if (status['exaoneAvailable']) {
+      } else if (status['exaoneAvailable'] == true) {
         statusText = 'EXAONE 사용 가능';
         statusColor = const Color(0xFF2196F3);
       } else {
@@ -492,6 +496,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.key),
+              title: const Text('API 키 설정'),
+              subtitle: Text(
+                AppConfig.instance.isValid() ? '설정됨' : '미설정',
+                style: TextStyle(
+                  color: AppConfig.instance.isValid() ? Colors.green : Colors.red,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showApiKeyDialog();
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('AI 설정'),
               onTap: () {
@@ -511,6 +529,65 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showApiKeyDialog() {
+    final TextEditingController apiKeyController = TextEditingController();
+    if (AppConfig.instance.geminiApiKey?.isNotEmpty == true) {
+      apiKeyController.text = AppConfig.instance.geminiApiKey!;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Gemini API 키 설정'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Google AI Studio에서 발급받은 Gemini API 키를 입력해주세요.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: apiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'API 키',
+                hintText: 'AIzaSy...',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '현재 모델: ${AppConfig.instance.geminiModelId}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final apiKey = apiKeyController.text.trim();
+              if (apiKey.isNotEmpty) {
+                AppConfig.instance.setGeminiApiKey(apiKey);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('API 키가 설정되었습니다')),
+                );
+                setState(() {}); // UI 업데이트
+              }
+            },
+            child: const Text('저장'),
+          ),
+        ],
       ),
     );
   }
@@ -542,7 +619,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   children: [
                     RadioListTile<LLMMode>(
                       title: const Text('하이브리드 모드'),
-                      subtitle: const Text('상황에 따라 최적의 모델 자동 선택'),
+                      subtitle: Text(
+                        status['geminiAvailable'] == true
+                            ? 'Gemini + 로컬 모델 자동 선택'
+                            : '상황에 따라 최적의 모델 자동 선택',
+                      ),
                       value: LLMMode.hybrid,
                       groupValue: currentMode,
                       onChanged: (value) {
@@ -557,7 +638,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                     RadioListTile<LLMMode>(
                       title: const Text('온라인 모드'),
-                      subtitle: const Text('클라우드 AI (GPT-4o) 사용'),
+                      subtitle: Text(
+                        status['geminiAvailable'] == true
+                            ? 'Gemini API 우선 사용'
+                            : '클라우드 AI (GPT-4o) 사용',
+                      ),
                       value: LLMMode.online,
                       groupValue: currentMode,
                       onChanged: (value) {
@@ -695,4 +780,3 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 }
-

@@ -55,12 +55,14 @@ dependencies:
   # ML/AI (ultralytics_yolo 임시 제거 - Java 17 요구사항으로 인한 빌드 오류)
   # ultralytics_yolo: ^0.1.26
   
+  # LLM Support - using HTTP client for llama.cpp server
+  
   # Social Login
   google_sign_in: ^7.1.1
   sign_in_with_apple: ^7.0.1
   
   # Weather API
-  http: ^1.2.2
+  http: ^1.5.0
   geolocator: ^14.0.1
   
   # OCR and Text Recognition (temporarily disabled - need to decide on implementation)

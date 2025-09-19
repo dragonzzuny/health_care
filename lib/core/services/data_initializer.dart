@@ -10,14 +10,56 @@ class DataInitializer {
   
   DataInitializer(this._db);
   
+  /// 기본 음식 데이터베이스 초기화
+  Future<void> _initializeFoodDatabase() async {
+    // Mock 데이터에서 사용하는 기본 음식 목록 (실제 DB 초기 데이터와 중복 체크)
+    final additionalFoods = [
+      {'id': 3, 'nameKo': '비빔밥', 'nameEn': 'Bibimbap', 'kcal': 130.0, 'carbs': 22.0, 'protein': 4.5, 'fat': 3.2, 'fiber': 2.5},
+      {'id': 4, 'nameKo': '된장찌개', 'nameEn': 'Doenjang Jjigae', 'kcal': 25.0, 'carbs': 3.2, 'protein': 2.8, 'fat': 0.6, 'fiber': 1.2},
+      {'id': 5, 'nameKo': '닭가슴살', 'nameEn': 'Chicken Breast', 'kcal': 165.0, 'carbs': 0.0, 'protein': 31.0, 'fat': 3.6, 'fiber': 0.0},
+      {'id': 6, 'nameKo': '브로콜리', 'nameEn': 'Broccoli', 'kcal': 34.0, 'carbs': 7.0, 'protein': 2.8, 'fat': 0.4, 'fiber': 2.6},
+      {'id': 7, 'nameKo': '시금치', 'nameEn': 'Spinach', 'kcal': 23.0, 'carbs': 3.6, 'protein': 2.9, 'fat': 0.4, 'fiber': 2.2},
+      {'id': 8, 'nameKo': '사과', 'nameEn': 'Apple', 'kcal': 52.0, 'carbs': 14.0, 'protein': 0.3, 'fat': 0.2, 'fiber': 2.4},
+      {'id': 9, 'nameKo': '바나나', 'nameEn': 'Banana', 'kcal': 89.0, 'carbs': 23.0, 'protein': 1.1, 'fat': 0.3, 'fiber': 2.6},
+      {'id': 10, 'nameKo': '아몬드', 'nameEn': 'Almond', 'kcal': 579.0, 'carbs': 22.0, 'protein': 21.0, 'fat': 50.0, 'fiber': 12.5},
+    ];
+    
+    for (var food in additionalFoods) {
+      // 중복 체크
+      final existing = await (_db.select(_db.foods)
+            ..where((f) => f.id.equals(food['id'] as int)))
+          .getSingleOrNull();
+      
+      if (existing == null) {
+        await _db.into(_db.foods).insert(
+          FoodsCompanion.insert(
+            nameKo: food['nameKo'] as String,
+            nameEn: Value(food['nameEn'] as String),
+            category: '기타',
+            kcalPer100g: Value(food['kcal'] as double),
+            carbsPer100g: Value(food['carbs'] as double),
+            proteinPer100g: Value(food['protein'] as double),
+            fatPer100g: Value(food['fat'] as double),
+            fiberPer100g: Value(food['fiber'] as double),
+            isVerified: const Value(true),
+          ),
+        );
+      }
+    }
+    print('✅ 추가 음식 데이터 ${additionalFoods.length}건 확인 완료');
+  }
+  
   /// 전체 Mock 데이터 초기화
   Future<void> initializeAllMockData() async {
     try {
       await _db.transaction(() async {
-        // 1. 사용자 설정 추가
+        // 1. 기본 음식 데이터 추가
+        await _initializeFoodDatabase();
+        
+        // 2. 사용자 설정 추가
         await _initializeUserPreferences();
         
-        // 2. 식단 데이터 추가
+        // 3. 식단 데이터 추가
         await _initializeFoodEntries();
         
         // 3. 즐겨찾는 포션 추가
@@ -81,6 +123,26 @@ class DataInitializer {
     if (count == 0) {
       // 식사 기록 추가
       for (var meal in mealData) {
+        // 음식 정보 조회해서 영양소 계산
+        final food = await (_db.select(_db.foods)
+              ..where((f) => f.id.equals(meal['foodId'])))
+            .getSingleOrNull();
+        
+        double totalCalories = 0;
+        double totalCarbs = 0;
+        double totalProtein = 0;
+        double totalFat = 0;
+        double totalFiber = 0;
+        
+        if (food != null) {
+          final portionGrams = meal['portionGrams'] as double;
+          totalCalories = (portionGrams * food.kcalPer100g / 100);
+          totalCarbs = (portionGrams * food.carbsPer100g / 100);
+          totalProtein = (portionGrams * food.proteinPer100g / 100);
+          totalFat = (portionGrams * food.fatPer100g / 100);
+          totalFiber = (portionGrams * food.fiberPer100g / 100);
+        }
+        
         await _db.into(_db.foodEntries).insert(
           FoodEntriesCompanion(
             userId: Value(meal['userId']),
@@ -89,7 +151,11 @@ class DataInitializer {
             mealType: Value(meal['mealType']),
             timestamp: Value(meal['timestamp']),
             notes: Value(meal['notes']),
-            // 영양 정보는 트리거나 서비스에서 자동 계산됨
+            totalCalories: Value(totalCalories),
+            totalCarbs: Value(totalCarbs),
+            totalProtein: Value(totalProtein),
+            totalFat: Value(totalFat),
+            totalFiber: Value(totalFiber),
           ),
         );
       }

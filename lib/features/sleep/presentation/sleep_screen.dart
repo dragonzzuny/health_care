@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../integration/ai_integration_layer.dart';
 
-class SleepScreen extends StatefulWidget {
+class SleepScreen extends ConsumerStatefulWidget {
   const SleepScreen({super.key});
 
   @override
-  State<SleepScreen> createState() => _SleepScreenState();
+  ConsumerState<SleepScreen> createState() => _SleepScreenState();
 }
 
-class _SleepScreenState extends State<SleepScreen> {
+class _SleepScreenState extends ConsumerState<SleepScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +39,10 @@ class _SleepScreenState extends State<SleepScreen> {
 
             // Sleep Stages
             _buildSleepStages(),
+            const SizedBox(height: 16),
+
+            // AI Sleep Analysis
+            _buildAISleepAnalysis(),
             const SizedBox(height: 16),
 
             // Sleep Tips
@@ -563,6 +569,200 @@ class _SleepScreenState extends State<SleepScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildAISleepAnalysis() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.smart_toy,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI 수면 분석',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Gemma3 AI가 수면 패턴을 분석해드립니다',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _requestSleepAnalysis(),
+                    icon: const Icon(Icons.psychology),
+                    label: const Text('수면 패턴 분석'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _requestSleepRecommendations(),
+                    icon: const Icon(Icons.lightbulb),
+                    label: const Text('개선 방안'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _requestSleepAnalysis() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('AI가 수면 패턴을 분석하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      final aiIntegration = ref.read(aiIntegrationProvider);
+      final result = await aiIntegration.getSleepAnalysis(
+        userId: 'user_001', // Mock user ID
+        sleepData: {
+          'averageSleepTime': 7.5,
+          'sleepQuality': 75,
+          'bedtime': '23:30',
+          'wakeupTime': '07:00',
+        },
+        sleepIssues: ['자주 깸', '꿈을 많이 꿈'],
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+        
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('AI 수면 분석 결과'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    result.recommendation?.recommendations ?? '분석 결과가 없습니다.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (result.recommendation?.improvementTips.isNotEmpty == true) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      '개선 제안:',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...result.recommendation!.improvementTips.map(
+                      (tip) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('• ', style: Theme.of(context).textTheme.bodyMedium),
+                            Expanded(child: Text(tip, style: Theme.of(context).textTheme.bodyMedium)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('닫기'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('분석 실패: $e')),
+        );
+      }
+    }
+  }
+
+  void _requestSleepRecommendations() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('맞춤형 수면 개선 방안을 준비하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      // 임시 데이터로 구현
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('맞춤형 수면 개선 방안 기능 준비 중입니다')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('요청 실패: $e')),
+        );
+      }
+    }
   }
 }
 

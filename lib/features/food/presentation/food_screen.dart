@@ -16,6 +16,7 @@ import '../../../core/database/app_database.dart';
 import '../repositories/food_entry_repository.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:fl_chart/fl_chart.dart';
+import '../../integration/ai_integration_layer.dart';
 
 extension StringExt on String {
   String capitalize() =>
@@ -40,7 +41,7 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this); // AI 추천 탭 추가
     _initializeDetector();
   }
 
@@ -75,6 +76,7 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
             Tab(icon: Icon(Icons.camera_alt), text: 'AI 인식'),
             Tab(icon: Icon(Icons.restaurant_menu), text: '식단 기록'),
             Tab(icon: Icon(Icons.analytics), text: '영양 분석'),
+            Tab(icon: Icon(Icons.smart_toy), text: 'AI 추천'),
             Tab(icon: Icon(Icons.history), text: '히스토리'),
           ],
         ),
@@ -85,6 +87,7 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
           _buildAIRecognitionTab(),
           _buildTodayTab(),
           _buildAnalysisTab(),
+          _buildAIRecommendationTab(),
           _buildHistoryTab(),
         ],
       ),
@@ -2155,5 +2158,268 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildAIRecommendationTab() {
+    return Consumer(
+      builder: (context, ref, child) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 헤더
+              Row(
+                children: [
+                  Icon(
+                    Icons.smart_toy,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'AI 식단 추천',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Gemma3 AI가 당신의 건강 목표에 맞는 맞춤형 식단을 추천해드립니다.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 식사별 추천 버튼들
+              _buildMealRecommendationButton('아침', Icons.wb_sunny, '건강한 하루의 시작'),
+              const SizedBox(height: 12),
+              _buildMealRecommendationButton('점심', Icons.restaurant, '에너지 충전을 위한'),
+              const SizedBox(height: 12),
+              _buildMealRecommendationButton('저녁', Icons.nightlight_round, '균형 잡힌 하루 마무리'),
+              const SizedBox(height: 12),
+              _buildMealRecommendationButton('간식', Icons.cookie, '건강한 간식'),
+              
+              const SizedBox(height: 32),
+              
+              // AI 분석 카드
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.analytics, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            '나의 식단 패턴 분석',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () => _requestDietAnalysis(),
+                        icon: const Icon(Icons.psychology),
+                        label: const Text('AI 분석 요청'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMealRecommendationButton(String mealType, IconData icon, String subtitle) {
+    return Card(
+      child: InkWell(
+        onTap: () => _requestMealRecommendation(mealType),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$mealType 추천',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _requestMealRecommendation(String mealType) async {
+    try {
+      // AIIntegrationLayer를 사용한 식단 추천
+      final aiIntegration = ref.read(aiIntegrationProvider);
+      
+      // 로딩 다이얼로그 표시
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('AI가 맞춤형 식단을 추천하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      final result = await aiIntegration.getDietRecommendations(
+        userId: 'user_001', // Mock user ID
+        mealType: mealType,
+        userPreferences: {
+          'dietaryRestrictions': [],
+          'nutritionalGoals': {'goal': 'weight_loss'},
+        },
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // 로딩 다이얼로그 닫기
+        
+        // 결과 표시
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('$mealType AI 추천'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    result.recommendation?.recommendations ?? '식단 추천을 생성할 수 없습니다.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (result.recommendation?.nutritionalInfo.isNotEmpty == true) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      '영양 정보:',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...result.recommendation!.nutritionalInfo.entries.map(
+                      (entry) => Text('${entry.key}: ${entry.value}'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('닫기'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // TODO: 추천 내용을 식단에 추가하는 기능
+                },
+                child: const Text('식단에 추가'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // 로딩 다이얼로그 닫기
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('AI 추천 실패: $e')),
+        );
+      }
+    }
+  }
+
+  void _requestDietAnalysis() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('식단 패턴을 분석하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      // TODO: 현재 식단 데이터 기반 분석 요청
+      await Future.delayed(const Duration(seconds: 2)); // 임시 대기
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('식단 분석 기능 준비 중입니다')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('분석 실패: $e')),
+        );
+      }
+    }
   }
 }

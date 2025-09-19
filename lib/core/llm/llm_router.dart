@@ -607,7 +607,7 @@ final llmRouterProvider = Provider<LLMRouter>((ref) {
 });
 
 final llmModeProvider = StateProvider<LLMMode>((ref) {
-  return LLMMode.hybrid;
+  return LLMMode.offline; // 로컬 모델 우선 사용
 });
 
 final llmOnlineStatusProvider = StateProvider<bool>((ref) {

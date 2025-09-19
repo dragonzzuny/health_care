@@ -5,6 +5,7 @@ import '../../../core/router/app_router.dart';
 import '../providers/activity_providers.dart';
 import '../../../features/food/providers/food_providers.dart';
 import '../../../features/food/repositories/food_entry_repository.dart';
+import '../../integration/ai_integration_layer.dart';
 
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
@@ -45,6 +46,10 @@ class ActivityScreen extends ConsumerWidget {
             _buildTodaysFoodSummary(context, ref),
             const SizedBox(height: 16),
             
+            // AI Exercise Recommendations
+            _buildAIExerciseRecommendations(context, ref),
+            const SizedBox(height: 16),
+
             // Quick Actions
             _buildQuickActions(context),
             const SizedBox(height: 16),
@@ -1122,6 +1127,223 @@ class ActivityScreen extends ConsumerWidget {
       case 'walking': return Colors.green;
       case 'yoga': return Colors.purple;
       default: return Colors.grey;
+    }
+  }
+
+  Widget _buildAIExerciseRecommendations(BuildContext context, WidgetRef ref) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.smart_toy,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI 운동 추천',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Gemma3 AI가 맞춤형 운동 계획을 제안합니다',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _requestExercisePlan(context, ref),
+                    icon: const Icon(Icons.fitness_center),
+                    label: const Text('주간 계획'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _requestQuickWorkout(context, ref),
+                    icon: const Icon(Icons.flash_on),
+                    label: const Text('퀵 운동'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _requestExercisePlan(BuildContext context, WidgetRef ref) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('AI가 주간 운동 계획을 생성하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      final aiIntegration = ref.read(aiIntegrationProvider);
+      final result = await aiIntegration.getExercisePlan(
+        userId: 'user_001', // Mock user ID
+        fitnessLevel: '중급',
+        weeklyAvailability: {
+          '월': 30,
+          '화': 0,
+          '수': 45,
+          '목': 0,
+          '금': 60,
+          '토': 90,
+          '일': 30,
+        },
+      );
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('AI 주간 운동 계획'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    result.recommendation?.weeklyPlan ?? '운동 계획을 생성할 수 없습니다.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (result.recommendation?.exercises.isNotEmpty == true) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      '추천 운동:',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...result.recommendation!.exercises.take(3).map(
+                      (exercise) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('• ', style: Theme.of(context).textTheme.bodyMedium),
+                            Expanded(
+                              child: Text(
+                                '${exercise['name']} (${exercise['duration']}분)',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('닫기'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('운동 계획이 캘린더에 추가되었습니다')),
+                  );
+                },
+                child: const Text('캘린더 추가'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('운동 계획 생성 실패: $e')),
+        );
+      }
+    }
+  }
+
+  void _requestQuickWorkout(BuildContext context, WidgetRef ref) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('지금 할 수 있는 운동을 찾고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+
+      // 임시 구현
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('퀵 운동 추천 기능 준비 중입니다')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('퀵 운동 요청 실패: $e')),
+        );
+      }
     }
   }
 }

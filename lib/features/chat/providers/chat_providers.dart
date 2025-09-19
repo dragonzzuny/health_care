@@ -171,6 +171,7 @@ class ChatLLMNotifier extends StateNotifier<ChatLLMState> {
       'isOnline': _llmRouter.isOnline,
       'gemmaAvailable': _llmRouter.isGemmaAvailable,
       'exaoneAvailable': _llmRouter.isExaoneAvailable,
+      'geminiAvailable': _llmRouter.isGeminiAvailable,
       'lastUsedModel': state.lastUsedModel,
     };
   }
