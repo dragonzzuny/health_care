@@ -15,6 +15,7 @@ import '../../features/report/presentation/report_screen.dart';
 import '../../features/medication/presentation/medication_screen.dart';
 import '../../features/cosmetics/presentation/cosmetics_screen.dart';
 import '../../features/weather/presentation/weather_screen.dart';
+import '../../features/insights/presentation/insights_screen.dart';
 import '../../shared/widgets/main_navigation.dart';
 import '../../debug/database_debug_screen.dart';
 
@@ -34,6 +35,7 @@ class AppRoutes {
   static const String medication = '/medication';
   static const String cosmetics = '/cosmetics';
   static const String weather = '/weather';
+  static const String insights = '/insights';
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String databaseDebug = '/database-debug';
@@ -113,6 +115,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.weather,
             builder: (context, state) => const WeatherScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.insights,
+            builder: (context, state) => const InsightsScreen(),
           ),
         ],
       ),
