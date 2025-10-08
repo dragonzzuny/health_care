@@ -8,7 +8,9 @@
       "Bash(flutter packages pub run build_runner build:*)",
       "Bash(flutter run:*)",
       "Bash(dart run:*)",
-      "Bash(flutter build:*)"
+      "Bash(flutter build:*)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

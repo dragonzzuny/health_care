@@ -9,13 +9,9 @@ import '../../../core/vision/detection.dart';
 import 'dart:ui' as ui;
 import 'dart:io';
 
-import '../../../shared/providers/app_providers.dart';
-import '../../../shared/services/api_service.dart';
 import '../providers/food_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../repositories/food_entry_repository.dart';
-import 'package:drift/drift.dart' hide Column;
-import 'package:fl_chart/fl_chart.dart';
 
 extension StringExt on String {
   String capitalize() =>
