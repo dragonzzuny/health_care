@@ -6,6 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SignCare is an AI-powered healthcare app built with Flutter for Android and iOS platforms. The app focuses on health management for diabetic patients and general users, featuring food recognition, health tracking, and AI-based health consultations.
 
+### Features Overview
+The app includes 13 main feature modules:
+- **Authentication** (`/login`, `/register`): Email/social login, user registration
+- **Activity Tracking** (`/activity`, `/home`): Daily activity monitoring, step counting, calorie tracking
+- **Food Management** (`/food`): Camera-based food recognition, nutrition tracking, meal logging
+- **Body Metrics** (`/body`): Weight, body measurements, health indicators
+- **Sleep Tracking** (`/sleep`): Sleep pattern analysis and monitoring
+- **AI Health Chat** (`/chat`): Real-time health consultations with local LLM models
+- **Health Reports** (`/report`): Weekly/monthly health analytics and insights
+- **Challenges** (`/challenge`): Goal setting, progress tracking, motivation features
+- **Medication** (`/medication`): Medication reminders and tracking
+- **Cosmetics** (`/cosmetics`): Cosmetic product safety and ingredient analysis
+- **Weather** (`/weather`): Weather-based health recommendations
+- **Insights** (`/insights`): Personalized health insights and trend analysis
+- **Debug Tools** (`/database-debug`): Developer tools for database inspection
+
 ## Development Commands
 
 ### Build and Run
@@ -92,8 +108,10 @@ python scripts/metal_measurement.py
 
 ### State Management Pattern (Riverpod)
 The app uses Riverpod for state management with the following patterns:
-- **Providers** are defined in feature-specific files and exposed through `shared/providers/app_providers.dart`
-- **StateNotifier** pattern for complex state management
+- **Core providers** in `shared/providers/app_providers.dart` include: Dio HTTP client, API service, auth state, health data, food recognition, and chat providers
+- **Feature-specific providers** are located in `features/*/providers/` directories (e.g., `activity_providers.dart`, `food_providers.dart`, `chat_providers.dart`)
+- **Infrastructure providers** in `shared/providers/` include: `database_providers.dart` for Drift database access, `developer_mode_provider.dart` for debug features
+- **StateNotifier** pattern for complex state management with immutable state updates
 - **ConsumerWidget/ConsumerStatefulWidget** for UI components that need reactive state
 - **AsyncNotifier** for asynchronous state management with built-in loading/error states
 
@@ -127,7 +145,15 @@ The food recognition feature (`lib/features/food/presentation/food_screen.dart`)
 - Camera/image picker for photo capture
 - Server API (`POST /food/recognize`) for nutritional data
 - Local nutrition database fallback (`assets/nutrition/`)
-- YOLO support via `ultralytics_yolo` package
+- YOLO support via `ultralytics_yolo` package (temporarily disabled due to Java 17 requirement)
+
+### Vision/Detection System
+Core object detection system in `lib/core/vision/`:
+- **Detector interface** (`detector.dart`): Abstract base class defining detection contract
+- **YOLO detector** (`yolo_view_detector.dart`): Production YOLO model integration for real-time object detection
+- **Mock detector** (`mock_detector.dart`): Testing implementation returning predefined results
+- **Detection models** (`detection.dart`): Data classes for detection results with confidence scores
+- This architecture allows swapping detection implementations without changing UI code
 
 ### LLM Integration
 - Local models (Gemma 3B, EXAONE 3.5) via `lib/core/llm/`
@@ -137,10 +163,56 @@ The food recognition feature (`lib/features/food/presentation/food_screen.dart`)
 - Models stored in `~/.signcare_models/`
 
 ### Database Architecture
-- **Drift** for local SQLite database with type-safe queries
-- Database files managed via `path_provider`
-- Migrations handled through Drift's schema versioning
-- Models with `@DataClassName` annotations for code generation
+The app uses **Drift** (formerly Moor) for a comprehensive local SQLite database:
+
+**Schema Management:**
+- Current schema version: **2**
+- Database file: `signcare_app.db` in app documents directory
+- WAL (Write-Ahead Logging) mode enabled for better performance
+- Foreign key constraints enabled
+- Automatic migrations with `MigrationStrategy`
+- Initial data seeding on first launch
+
+**Table Structure** (organized in `lib/core/database/tables/`):
+- **Food tables**: Foods, FoodSynonyms, CommonPortions
+- **Entry tables**: FoodEntries, FavoritePortions, DailyNutritionSummaries
+- **Recognition tables**: RecognitionHistories, RecognitionResults, RecognitionFeedbacks
+- **User tables**: UserPreferences, CustomFoods, UserFoodStatistics
+- **Activity tables**: DailyActivities, WorkoutSessions, ActivityGoals, WeightRecords
+
+**Key Features:**
+- Type-safe query builder with compile-time verification
+- Transaction support via `runInTransaction()` helper
+- Database health check with `isDatabaseHealthy()`
+- Backup functionality with `VACUUM INTO` for data export
+- Statistics API with `getDatabaseStats()` for debugging
+- Models use `@DataClassName` annotations for code generation
+- Repository pattern in `lib/core/database/repositories/`
+
+### Development & Debugging Tools
+**Developer Mode:**
+- Managed by `shared/providers/developer_mode_provider.dart`
+- Enables debug features and advanced logging throughout the app
+- Toggle via app settings or debug menu
+
+**Database Debug Screen:**
+- Route: `/database-debug` (defined in `app_router.dart`)
+- Screen: `debug/database_debug_screen.dart`
+- Features: View tables, inspect data, run queries, check database health
+- Access database statistics and perform manual operations
+
+**Mock Data:**
+- Located in `lib/core/mock/` directory
+- `mock_activity_data.dart`: Sample activity and workout data
+- `mock_chat_data.dart`: Sample chat conversations for UI testing
+- `mock_food_data.dart`: Sample food items and nutrition data
+- `mock_sleep_data.dart`: Sample sleep patterns and records
+- Used for development, testing, and offline mode
+
+**Data Initializer:**
+- Service: `lib/core/services/data_initializer.dart`
+- Seeds initial data on first launch
+- Populates default foods, portions, and reference data
 
 ## Key Technical Decisions
 
@@ -148,6 +220,34 @@ The food recognition feature (`lib/features/food/presentation/food_screen.dart`)
 - **Windows**: Primary development platform (paths use backslashes)
 - **Android**: Gradle wrapper available at `android/gradlew` and `android/gradlew.bat`
 - **iOS**: Standard Flutter iOS setup with CocoaPods
+
+### Environment Configuration
+The app uses `flutter_dotenv` for environment variable management:
+
+**Setup:**
+```bash
+# Create .env file in project root
+echo "SERVICE_KEY=your_service_key_here" > .env
+echo "OPENAI_API_KEY=your_openai_api_key_here" >> .env
+```
+
+**Required Variables:**
+- `SERVICE_KEY`: API key for external health data services (e.g., metal measurement API)
+- `OPENAI_API_KEY`: OpenAI API key for cloud-based AI features
+
+**Security Notes:**
+- `.env` file is included in `.gitignore` to prevent committing secrets
+- Never commit actual API keys to version control
+- `.env` file must be created locally after cloning the repository
+- The file is loaded at app startup via `flutter_dotenv` package
+
+**OpenAI Integration:**
+- Base URL: `https://api.openai.com/v1` (from `app_constants.dart`)
+- Primary model: `gpt-5-nano` (most cost-effective)
+- Fallback model: `gpt-4o-mini` (if primary unavailable)
+- Default timeout: 60 seconds for AI responses
+- Temperature: 0.7 for balanced creativity
+- Max tokens: 1000 per response
 
 ### Asset Management
 - Images stored in `assets/images/`

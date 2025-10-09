@@ -46,6 +46,34 @@ SignCare는 당뇨 환자와 건강 관리가 필요한 일반인을 위한 AI �
 - 목표 설정 및 달성
 - 진행률 추적
 
+### 7. 약물 관리
+
+- 약물 복용 기록 및 알림
+- 처방전 관리
+- 복용 시간 알림
+- 약물 상호작용 체크
+
+### 8. 화장품 안전 정보
+
+- 화장품 성분 분석
+- 알레르기 성분 확인
+- 제품 안전성 정보 제공
+- 개인 피부 타입별 추천
+
+### 9. 날씨 기반 건강 조언
+
+- 실시간 날씨 정보
+- 날씨 기반 활동 추천
+- 미세먼지 정보 및 건강 조언
+- 온도별 운동 가이드
+
+### 10. 건강 인사이트
+
+- 개인화된 건강 분석
+- 트렌드 기반 인사이트
+- 예측 모델 기반 건강 조언
+- 대화형 데이터 시각화
+
 ## 기술 스택
 
 ### Frontend (Flutter)
@@ -79,30 +107,41 @@ SignCare는 당뇨 환자와 건강 관리가 필요한 일반인을 위한 AI �
 
 ```
 lib/
-├── core/                    # 핵심 설정 및 유틸리티
-│   ├── constants/          # 앱 상수
-│   ├── theme/             # 테마 설정
-│   ├── router/            # 라우팅 설정
-│   └── llm/               # LLM 모델 관리 ✅
-├── features/              # 기능별 모듈
-│   ├── auth/             # 인증
-│   ├── activity/         # 활동 추적
-│   ├── food/             # 식단 관리 ✅
-│   ├── exercise/         # 운동 관리
-│   ├── sleep/            # 수면 관리
-│   ├── body/             # 신체 관리
-│   ├── chat/             # AI 상담 ✅
-│   │   ├── models/       # 채팅 모델 ✅
-│   │   ├── providers/    # 채팅 상태 관리 ✅
-│   │   └── presentation/ # 채팅 UI ✅
-│   ├── report/           # 리포트
-│   └── challenge/        # 챌린지
-├── shared/               # 공통 컴포넌트
-│   ├── models/           # 데이터 모델
-│   ├── services/         # API 서비스
-│   ├── providers/        # 상태 관리
-│   └── widgets/          # 공통 위젯
-└── main.dart            # 앱 진입점
+├── core/                       # 핵심 설정 및 유틸리티
+│   ├── constants/             # 앱 상수
+│   ├── theme/                # 테마 설정
+│   ├── router/               # 라우팅 설정
+│   ├── llm/                  # LLM 모델 관리 ✅
+│   ├── database/             # 데이터베이스 (Drift)
+│   │   ├── tables/           # 테이블 정의
+│   │   └── repositories/     # 리포지토리 패턴
+│   ├── vision/               # 객체 인식 시스템
+│   ├── mock/                 # 개발용 목 데이터
+│   └── services/             # 핵심 서비스
+├── features/                  # 기능별 모듈
+│   ├── auth/                 # 인증
+│   ├── activity/             # 활동 추적
+│   ├── food/                 # 식단 관리 ✅
+│   ├── body/                 # 신체 관리
+│   ├── sleep/                # 수면 관리
+│   ├── chat/                 # AI 상담 ✅
+│   │   ├── models/           # 채팅 모델 ✅
+│   │   ├── providers/        # 채팅 상태 관리 ✅
+│   │   └── presentation/     # 채팅 UI ✅
+│   ├── report/               # 리포트
+│   ├── challenge/            # 챌린지
+│   ├── medication/           # 약물 관리 ✅
+│   ├── cosmetics/            # 화장품 정보 ✅
+│   ├── weather/              # 날씨 정보 ✅
+│   └── insights/             # 건강 인사이트 ✅
+├── shared/                    # 공통 컴포넌트
+│   ├── models/               # 데이터 모델
+│   ├── services/             # API 서비스
+│   ├── providers/            # 상태 관리
+│   └── widgets/              # 공통 위젯
+├── debug/                     # 디버깅 도구
+│   └── database_debug_screen.dart
+└── main.dart                 # 앱 진입점
 ```
 
 ## 설치 및 실행
@@ -162,6 +201,82 @@ dart run scripts/model_downloader_cli.dart exaone
 필요한 경우 [Ollama Gemma3 페이지](https://ollama.com/library/gemma3)와
 [EXAONE 3.5 GitHub 저장소](https://github.com/LG-AI-EXAONE/EXAONE-3.5)를
 참고하여 최신 다운로드 URL과 해시 값을 확인하세요.
+
+### 5. 환경 변수 설정
+
+앱 실행에 필요한 API 키를 `.env` 파일에 설정해야 합니다.
+
+```bash
+# 프로젝트 루트에 .env 파일 생성
+echo "SERVICE_KEY=발급받은_서비스키" > .env
+echo "OPENAI_API_KEY=발급받은_OpenAI_키" >> .env
+```
+
+**필수 환경 변수:**
+- `SERVICE_KEY`: 외부 건강 데이터 서비스 API 키 (중금속 측정 등)
+- `OPENAI_API_KEY`: OpenAI API 키 (클라우드 기반 AI 기능용)
+
+**보안 주의사항:**
+- `.env` 파일은 `.gitignore`에 포함되어 있어 Git에 커밋되지 않습니다
+- 실제 API 키를 절대 버전 관리 시스템에 커밋하지 마세요
+- 저장소를 클론한 후 로컬에서 직접 `.env` 파일을 생성해야 합니다
+
+## 데이터베이스 구조
+
+앱은 **Drift** (구 Moor)를 사용하여 포괄적인 로컬 SQLite 데이터베이스를 관리합니다.
+
+**주요 특징:**
+- 현재 스키마 버전: **2**
+- WAL (Write-Ahead Logging) 모드로 성능 최적화
+- 외래 키 제약 조건 활성화
+- 자동 마이그레이션 지원
+- 초기 데이터 시딩 (기본 음식 데이터 등)
+
+**테이블 구성:**
+- 음식 테이블: Foods, FoodSynonyms, CommonPortions
+- 식사 기록: FoodEntries, FavoritePortions, DailyNutritionSummaries
+- AI 인식: RecognitionHistories, RecognitionResults, RecognitionFeedbacks
+- 사용자: UserPreferences, CustomFoods, UserFoodStatistics
+- 활동: DailyActivities, WorkoutSessions, ActivityGoals, WeightRecords
+
+**개발자 도구:**
+- 데이터베이스 디버그 화면: 앱에서 `/database-debug` 라우트로 접근
+- 테이블 조회, 데이터 검사, 쿼리 실행 가능
+- 데이터베이스 건강 상태 확인 및 백업 기능
+
+## 개발자 모드 및 디버깅
+
+### 개발자 모드 활성화
+
+앱 내에서 개발자 모드를 활성화하면 고급 디버깅 기능을 사용할 수 있습니다.
+
+**기능:**
+- 고급 로깅 및 디버그 정보 표시
+- 성능 모니터링 도구
+- 데이터베이스 직접 접근
+- 목 데이터 사용 전환
+
+### 데이터베이스 디버그 화면
+
+앱 실행 후 `/database-debug` 라우트로 이동하여 데이터베이스를 직접 탐색할 수 있습니다.
+
+**제공 기능:**
+- 모든 테이블 조회 및 데이터 검사
+- 커스텀 SQL 쿼리 실행
+- 데이터베이스 통계 및 건강 상태 확인
+- 데이터 백업 및 복원
+- 테이블별 레코드 수 확인
+
+### 목 데이터 사용
+
+개발 및 테스트를 위한 목 데이터가 `lib/core/mock/` 디렉터리에 준비되어 있습니다:
+
+- `mock_activity_data.dart`: 활동 및 운동 데이터
+- `mock_chat_data.dart`: AI 채팅 대화 샘플
+- `mock_food_data.dart`: 음식 및 영양 정보
+- `mock_sleep_data.dart`: 수면 패턴 기록
+
+네트워크 없이 오프라인에서 앱을 테스트하거나, 다양한 시나리오를 빠르게 확인할 때 유용합니다.
 
 ## 식품 영양 대시보드 및 인식 기능
 
@@ -390,25 +505,66 @@ flutter build ios --release
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.4.9
-  go_router: ^12.1.3
-  dio: ^5.4.0
-  retrofit: ^4.0.3
-  json_annotation: ^4.8.1
-  shared_preferences: ^2.2.2
-  permission_handler: ^11.1.0
-  image_picker: ^1.0.4
-  charts_flutter: ^0.12.0
-  tflite_flutter: ^0.10.4
+
+  # 상태 관리
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # 네비게이션
+  go_router: ^16.2.1
+
+  # 로컬 데이터베이스
+  drift: ^2.26.1
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+
+  # 네트워크
+  dio: ^5.4.3+1
+  retrofit: ^4.1.0
+  web_socket_channel: ^3.0.3
+
+  # JSON 직렬화
+  json_annotation: ^4.9.0
+  freezed_annotation: ^3.0.0
+
+  # 차트 및 데이터 시각화
+  fl_chart: ^0.69.0
+  syncfusion_flutter_charts: ^31.1.17
+
+  # 건강 및 센서
+  health: ^13.1.0
+  permission_handler: ^12.0.0+1
+
+  # 카메라 및 이미지
+  camera: ^0.11.1
+  image_picker: ^1.1.2
+
+  # 소셜 로그인
+  google_sign_in: ^7.1.1
+  sign_in_with_apple: ^7.0.1
+
+  # 유틸리티
+  shared_preferences: ^2.2.3
+  flutter_dotenv: ^5.1.0
+  logger: ^2.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.4.7
-  retrofit_generator: ^8.0.6
-  json_serializable: ^6.7.1
-  riverpod_generator: ^2.3.9
+  flutter_lints: ^6.0.0
+
+  # 코드 생성
+  build_runner: ^2.4.15
+  drift_dev: ^2.26.1
+  json_serializable: ^6.9.5
+  freezed: ^3.0.6
+  riverpod_generator: ^2.4.3
+  retrofit_generator: ^9.0.0
+
+  # 테스팅
   mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
 ```
 
 ## 문제 해결
