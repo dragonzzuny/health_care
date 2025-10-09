@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:dio/dio.dart';
+import '../constants/app_constants.dart';
 
 enum LLMModel {
   gemma1B, // Legacy - will be replaced by exaone4_1B
@@ -271,23 +274,98 @@ class LLMRouter {
   }
 
   Future<LLMResponse> _processWithGPT4o(LLMRequest request) async {
+    final apiKey = dotenv.env['OPENAI_API_KEY'];
+
+    // If no API key, use simulation mode
+    if (apiKey == null || apiKey.isEmpty) {
+      _logger.w('OpenAI API key not found, using simulation mode');
+      return _simulateGPT4o(request);
+    }
+
     try {
-      // Simulate GPT-4o API call
-      await Future.delayed(const Duration(milliseconds: 1500));
-      
-      final response = _generateAdvancedResponse(request.message);
-      
+      // Make real API call
+      final dio = Dio();
+      final startTime = DateTime.now();
+
+      final response = await dio.post(
+        '${AppConstants.openAIBaseUrl}/chat/completions',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          sendTimeout: AppConstants.openAITimeout,
+          receiveTimeout: AppConstants.openAITimeout,
+        ),
+        data: {
+          'model': AppConstants.openAIModel,
+          'messages': [
+            {
+              'role': 'system',
+              'content': '당신은 SignCare 앱의 AI 건강 상담사입니다. 사용자의 건강 관리를 돕기 위해 친절하고 전문적인 조언을 제공합니다.',
+            },
+            if (request.context != null)
+              {
+                'role': 'system',
+                'content': 'Context: ${request.context}',
+              },
+            {
+              'role': 'user',
+              'content': request.message,
+            },
+          ],
+          'temperature': AppConstants.openAITemperature,
+          'max_tokens': AppConstants.openAIMaxTokens,
+        },
+      );
+
+      final processingTime = DateTime.now().difference(startTime).inMilliseconds;
+      final content = response.data['choices'][0]['message']['content'];
+      final modelUsed = response.data['model'];
+
+      _logger.i('OpenAI API call successful - Model: $modelUsed, Time: ${processingTime}ms');
+
       return LLMResponse(
-        response: response,
+        response: content,
         usedModel: LLMModel.gpt4o,
         confidence: 0.95,
         timestamp: DateTime.now(),
-        metadata: {'processing_time_ms': 1500, 'model_version': 'gpt-4o'},
+        metadata: {
+          'processing_time_ms': processingTime,
+          'model_version': modelUsed,
+          'api_mode': 'real',
+        },
       );
+    } on DioException catch (e) {
+      _logger.e('OpenAI API call failed: ${e.message}, falling back to simulation');
+
+      // Fallback to simulation on API error
+      return _simulateGPT4o(request);
     } catch (e) {
-      _logger.e('GPT-4o processing failed: $e');
-      rethrow;
+      _logger.e('Unexpected error in GPT-4o processing: $e, falling back to simulation');
+
+      // Fallback to simulation on any error
+      return _simulateGPT4o(request);
     }
+  }
+
+  Future<LLMResponse> _simulateGPT4o(LLMRequest request) async {
+    // Original simulation logic
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    final response = _generateAdvancedResponse(request.message);
+
+    return LLMResponse(
+      response: response,
+      usedModel: LLMModel.gpt4o,
+      confidence: 0.95,
+      timestamp: DateTime.now(),
+      metadata: {
+        'processing_time_ms': 1500,
+        'model_version': 'gpt-4o-simulation',
+        'api_mode': 'simulation',
+      },
+    );
   }
 
   String _generateBasicResponse(String message, String modelName) {

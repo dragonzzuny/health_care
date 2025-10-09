@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/chat_providers.dart';
+import '../providers/model_management_provider.dart';
 import '../models/chat_models.dart';
 import '../../../core/llm/llm_router.dart';
+import '../../../core/llm/model_downloader.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -676,119 +678,300 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _showModelDownloadDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('오프라인 모델 다운로드'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('오프라인 모드를 사용하려면 로컬 AI 모델을 다운로드해야 합니다.'),
-              const SizedBox(height: 16),
-              const Text(
-                '권장 모델:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              _buildModelRecommendation(
-                'EXAONE 4.0 1.2B',
-                '한국어 특화, 경량 (700MB)',
-                'exaone4',
-                const Color(0xFF00BCD4),
-              ),
-              const SizedBox(height: 8),
-              _buildModelRecommendation(
-                'MedGemma 4B',
-                '의료 전문, 멀티모달 (2.6GB)',
-                'medgemma',
-                const Color(0xFFE91E63),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '터미널에서 다음 명령어를 실행하세요:',
-                style: TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: const Text(
-                  'dart run scripts/model_downloader_cli.dart exaone4\n'
-                  'dart run scripts/model_downloader_cli.dart medgemma',
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 11,
+      barrierDismissible: false,
+      builder: (dialogContext) => Consumer(
+        builder: (context, ref, child) {
+          final managementState = ref.watch(modelManagementProvider);
+
+          return AlertDialog(
+            title: const Text('오프라인 모델 다운로드'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('오프라인 모드를 사용하려면 로컬 AI 모델을 다운로드해야 합니다.'),
+                  const SizedBox(height: 8),
+                  Text(
+                    '• Wi-Fi 연결을 권장합니다\n• 다운로드는 백그라운드에서 진행됩니다',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '추천 모델:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildDownloadableModelCard(
+                    managementState,
+                    ModelType.exaone4_1B,
+                    'EXAONE 4.0 1.2B',
+                    '한국어 특화, 경량',
+                    const Color(0xFF00BCD4),
+                    Icons.translate,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildDownloadableModelCard(
+                    managementState,
+                    ModelType.medGemma4B,
+                    'MedGemma 4B',
+                    '의료 전문, 멀티모달',
+                    const Color(0xFFE91E63),
+                    Icons.medical_services,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('닫기'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDownloadableModelCard(
+    ModelManagementState state,
+    ModelType modelType,
+    String name,
+    String description,
+    Color color,
+    IconData icon,
+  ) {
+    final modelInfo = state.modelInfos[modelType]!;
+    final status = state.modelStatuses[modelType] ?? DownloadStatus.notDownloaded;
+    final progress = state.downloadProgresses[modelType];
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    Text(
+                      '$description • ${modelInfo.displaySize}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('모델 다운로드 후 다시 시도해주세요.'),
-                  duration: Duration(seconds: 3),
+          const SizedBox(height: 12),
+
+          // Download Progress
+          if (status == DownloadStatus.downloading && progress != null) ...[
+            LinearProgressIndicator(
+              value: progress.percentage / 100,
+              backgroundColor: color.withOpacity(0.1),
+              color: color,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${progress.percentage.toStringAsFixed(1)}%',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              );
-            },
-            child: const Text('확인'),
+                Text(
+                  '${progress.speedDisplay} • ${progress.etaDisplay}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ] else if (status == DownloadStatus.verifying) ...[
+            LinearProgressIndicator(
+              backgroundColor: color.withOpacity(0.1),
+              color: color,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '파일 검증 중...',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+
+          const SizedBox(height: 8),
+
+          // Action Button
+          SizedBox(
+            width: double.infinity,
+            child: _buildModelActionButton(modelType, status, color),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildModelRecommendation(
-    String name,
-    String description,
-    String command,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.download, color: color, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                    fontSize: 13,
-                  ),
+  Widget _buildModelActionButton(ModelType modelType, DownloadStatus status, Color color) {
+    switch (status) {
+      case DownloadStatus.notDownloaded:
+        return ElevatedButton.icon(
+          onPressed: () => _startModelDownload(modelType),
+          icon: const Icon(Icons.download, size: 18),
+          label: const Text('다운로드'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+          ),
+        );
+
+      case DownloadStatus.downloading:
+        return OutlinedButton.icon(
+          onPressed: () => _cancelModelDownload(modelType),
+          icon: const Icon(Icons.cancel, size: 18),
+          label: const Text('취소'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: color,
+          ),
+        );
+
+      case DownloadStatus.downloaded:
+        return Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '다운로드 완료',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
                 ),
-                Text(
-                  description,
-                  style: const TextStyle(fontSize: 11),
-                ),
-              ],
+              ),
             ),
+            IconButton(
+              onPressed: () => _deleteModel(modelType),
+              icon: const Icon(Icons.delete_outline, size: 18),
+              color: Colors.red,
+              tooltip: '삭제',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        );
+
+      case DownloadStatus.failed:
+        return ElevatedButton.icon(
+          onPressed: () => _startModelDownload(modelType),
+          icon: const Icon(Icons.refresh, size: 18),
+          label: const Text('다시 시도'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+          ),
+        );
+
+      case DownloadStatus.verifying:
+        return const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 8),
+            Text('검증 중...', style: TextStyle(fontSize: 13)),
+          ],
+        );
+    }
+  }
+
+  void _startModelDownload(ModelType modelType) {
+    final modelInfo = ref.read(modelManagementProvider).modelInfos[modelType]!;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${modelInfo.name} 다운로드를 시작합니다...'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    ref.read(modelManagementProvider.notifier).downloadModel(modelType);
+  }
+
+  void _cancelModelDownload(ModelType modelType) {
+    ref.read(modelManagementProvider.notifier).cancelDownload(modelType);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('다운로드가 취소되었습니다'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _deleteModel(ModelType modelType) {
+    final modelInfo = ref.read(modelManagementProvider).modelInfos[modelType]!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('모델 삭제'),
+        content: Text('${modelInfo.name}을(를) 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ref.read(modelManagementProvider.notifier).deleteModel(modelType);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? '모델이 삭제되었습니다' : '모델 삭제에 실패했습니다'),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('삭제'),
           ),
         ],
       ),
     );
   }
+
 }
 

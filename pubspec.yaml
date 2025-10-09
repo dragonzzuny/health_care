@@ -74,7 +74,8 @@ dependencies:
   shared_preferences: ^2.2.3
   crypto: ^3.0.3
   uuid: ^4.4.2
-  
+  flutter_dotenv: ^5.1.0
+
   # Logging
   logger: ^2.4.0
 
@@ -104,6 +105,7 @@ flutter:
     - assets/models/
     - assets/lottie/
     - assets/nutrition/
+    - .env
   
   fonts:
     - family: Pretendard

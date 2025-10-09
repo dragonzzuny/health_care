@@ -9,6 +9,14 @@ class AppConstants {
   static const String baseUrl = 'https://api.signcare.com';
   static const String apiVersion = 'v1';
   static const Duration apiTimeout = Duration(seconds: 30);
+
+  // OpenAI API
+  static const String openAIBaseUrl = 'https://api.openai.com/v1';
+  static const String openAIModel = 'gpt-5-nano'; // Most cost-effective model
+  static const String openAIModelFallback = 'gpt-4o-mini'; // Fallback if gpt-5-nano unavailable
+  static const double openAITemperature = 0.7;
+  static const int openAIMaxTokens = 1000;
+  static const Duration openAITimeout = Duration(seconds: 60);
   
   // LLM Models
   static const String gemmaModelName = 'gemma-1b-q4';

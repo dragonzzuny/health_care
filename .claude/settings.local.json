@@ -11,7 +11,9 @@
       "Bash(flutter build:*)",
       "Bash(mkdir:*)",
       "Bash(git add:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
