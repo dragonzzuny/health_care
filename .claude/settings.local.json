@@ -10,7 +10,8 @@
       "Bash(dart run:*)",
       "Bash(flutter build:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

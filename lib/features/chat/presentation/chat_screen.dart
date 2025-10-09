@@ -383,10 +383,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatLLMProvider);
     final chatNotifier = ref.read(chatLLMProvider.notifier);
     final status = chatNotifier.getLLMStatus();
-    
+
     String statusText = '온라인';
     Color statusColor = Colors.green;
-    
+
     if (chatState.isLoading) {
       statusText = '응답 중...';
       statusColor = Colors.blue;
@@ -394,12 +394,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       statusText = '오프라인 모드';
       statusColor = Colors.orange;
     } else {
-      // Show preferred model in status
-      if (status['gemmaAvailable']) {
+      // Show preferred model in status (prioritize new models)
+      if (status['exaone4Available']) {
+        statusText = 'EXAONE 4.0 사용 가능';
+        statusColor = const Color(0xFF00BCD4);
+      } else if (status['medGemmaAvailable']) {
+        statusText = 'MedGemma 사용 가능';
+        statusColor = const Color(0xFFE91E63);
+      } else if (status['gemmaAvailable']) {
         statusText = 'Gemma3 사용 가능';
         statusColor = const Color(0xFF4CAF50);
       } else if (status['exaoneAvailable']) {
-        statusText = 'EXAONE 사용 가능';
+        statusText = 'EXAONE 3.5 사용 가능';
         statusColor = const Color(0xFF2196F3);
       } else {
         statusText = 'GPT-4o 모드';
@@ -577,34 +583,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         children: [
                           Text('로컬 AI 사용'),
                           const SizedBox(height: 4),
-                          Row(
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
                             children: [
-                              Icon(
-                                status['gemmaAvailable'] ? Icons.check_circle : Icons.cancel,
-                                size: 16,
-                                color: status['gemmaAvailable'] ? const Color(0xFF4CAF50) : Colors.red,
+                              _buildModelStatusChip(
+                                'EXAONE 4.0',
+                                status['exaone4Available'],
+                                const Color(0xFF00BCD4),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Gemma3 ${status['gemmaAvailable'] ? '사용 가능' : '다운로드 필요'}',
-                                style: TextStyle(
-                                  color: status['gemmaAvailable'] ? const Color(0xFF4CAF50) : Colors.red,
-                                  fontSize: 12,
-                                ),
+                              _buildModelStatusChip(
+                                'MedGemma',
+                                status['medGemmaAvailable'],
+                                const Color(0xFFE91E63),
                               ),
-                              const SizedBox(width: 12),
-                              Icon(
-                                status['exaoneAvailable'] ? Icons.check_circle : Icons.cancel,
-                                size: 16,
-                                color: status['exaoneAvailable'] ? const Color(0xFF2196F3) : Colors.red,
+                              _buildModelStatusChip(
+                                'Gemma3',
+                                status['gemmaAvailable'],
+                                const Color(0xFF4CAF50),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'EXAONE ${status['exaoneAvailable'] ? '사용 가능' : '다운로드 필요'}',
-                                style: TextStyle(
-                                  color: status['exaoneAvailable'] ? const Color(0xFF2196F3) : Colors.red,
-                                  fontSize: 12,
-                                ),
+                              _buildModelStatusChip(
+                                'EXAONE 3.5',
+                                status['exaoneAvailable'],
+                                const Color(0xFF2196F3),
                               ),
                             ],
                           ),
@@ -614,7 +615,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       groupValue: currentMode,
                       onChanged: (value) {
                         if (value != null) {
-                          if (!status['gemmaAvailable'] && !status['exaoneAvailable']) {
+                          if (!status['exaone4Available'] &&
+                              !status['medGemmaAvailable'] &&
+                              !status['gemmaAvailable'] &&
+                              !status['exaoneAvailable']) {
                             _showModelDownloadDialog();
                             return;
                           }
@@ -636,42 +640,93 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  Widget _buildModelStatusChip(String name, bool available, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: available ? color.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: available ? color : Colors.grey,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            available ? Icons.check_circle : Icons.cancel,
+            size: 14,
+            color: available ? color : Colors.grey,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            name,
+            style: TextStyle(
+              color: available ? color : Colors.grey,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showModelDownloadDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('오프라인 모델 다운로드'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('오프라인 모드를 사용하려면 로컬 AI 모델을 다운로드해야 합니다.'),
-            const SizedBox(height: 16),
-            const Text(
-              '권장 모델: Gemma3 (한국어 및 건강 상담에 최적화)',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '터미널에서 다음 명령어를 실행하세요:',
-              style: TextStyle(fontSize: 12),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('오프라인 모드를 사용하려면 로컬 AI 모델을 다운로드해야 합니다.'),
+              const SizedBox(height: 16),
+              const Text(
+                '권장 모델:',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              child: const Text(
-                'dart run scripts/model_downloader_cli.dart gemma',
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 12,
+              const SizedBox(height: 8),
+              _buildModelRecommendation(
+                'EXAONE 4.0 1.2B',
+                '한국어 특화, 경량 (700MB)',
+                'exaone4',
+                const Color(0xFF00BCD4),
+              ),
+              const SizedBox(height: 8),
+              _buildModelRecommendation(
+                'MedGemma 4B',
+                '의료 전문, 멀티모달 (2.6GB)',
+                'medgemma',
+                const Color(0xFFE91E63),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '터미널에서 다음 명령어를 실행하세요:',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: const Text(
+                  'dart run scripts/model_downloader_cli.dart exaone4\n'
+                  'dart run scripts/model_downloader_cli.dart medgemma',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -689,6 +744,47 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               );
             },
             child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelRecommendation(
+    String name,
+    String description,
+    String command,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.download, color: color, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -7,8 +7,10 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ModelType {
-  gemma1B,
-  exaone24B,
+  gemma1B, // Legacy
+  exaone24B, // Legacy
+  exaone4_1B, // EXAONE 4.0 1.2B - Primary model
+  medGemma4B, // MedGemma 4B - Medical specialized
 }
 
 enum DownloadStatus {
@@ -97,7 +99,7 @@ class ModelDownloader {
   static const Map<ModelType, ModelInfo> _modelConfigs = {
     ModelType.gemma1B: ModelInfo(
       type: ModelType.gemma1B,
-      name: 'Gemma 1B',
+      name: 'Gemma 3B (Legacy)',
       version: '1.0.0',
       sizeBytes: 530 * 1024 * 1024, // ~530 MB
       // Gemma model (3B) provided by Google via Ollama
@@ -108,7 +110,7 @@ class ModelDownloader {
     ),
     ModelType.exaone24B: ModelInfo(
       type: ModelType.exaone24B,
-      name: 'EXAONE 2.4B',
+      name: 'EXAONE 3.5 2.4B (Legacy)',
       version: '1.0.0',
       sizeBytes: 1200 * 1024 * 1024, // ~1.2 GB
       // EXAONE 3.5 model from LG AI Research
@@ -116,7 +118,33 @@ class ModelDownloader {
       downloadUrl:
           'https://github.com/LG-AI-EXAONE/EXAONE-3.5/releases/download/v1.0/exaone-3.5-q4.gguf',
       sha256Hash: 'def456ghi789...', // TODO: update with official hash
-      fileName: 'exaone-3.5-q4.gguf',
+      fileName: 'exaone-3.5-2.4b-q4.gguf',
+    ),
+    ModelType.exaone4_1B: ModelInfo(
+      type: ModelType.exaone4_1B,
+      name: 'EXAONE 4.0 1.2B',
+      version: '1.0.0',
+      sizeBytes: 700 * 1024 * 1024, // ~700 MB
+      // EXAONE 4.0 1.2B from LG AI Research
+      // Repository: https://huggingface.co/LGAI-EXAONE/EXAONE-4.0-1.2B-GGUF
+      // Korean-specialized with hybrid reasoning (Fast + Deep modes)
+      downloadUrl:
+          'https://huggingface.co/LGAI-EXAONE/EXAONE-4.0-1.2B-GGUF/resolve/main/exaone-4.0-1.2b-q4-k-m.gguf',
+      sha256Hash: 'exaone4_hash...', // TODO: update with official hash
+      fileName: 'exaone-4.0-1.2b-q4-k-m.gguf',
+    ),
+    ModelType.medGemma4B: ModelInfo(
+      type: ModelType.medGemma4B,
+      name: 'MedGemma 4B',
+      version: '1.0.0',
+      sizeBytes: 2600 * 1024 * 1024, // ~2.6 GB
+      // MedGemma 4B from Google Health AI
+      // Repository: https://huggingface.co/google/medgemma-4b-it
+      // Medical domain specialized with multimodal support
+      downloadUrl:
+          'https://huggingface.co/google/medgemma-4b-it/resolve/main/medgemma-4b-q4-k-m.gguf',
+      sha256Hash: 'medgemma_hash...', // TODO: update with official hash
+      fileName: 'medgemma-4b-q4-k-m.gguf',
     ),
   };
 
