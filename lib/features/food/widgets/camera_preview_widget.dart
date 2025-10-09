@@ -40,7 +40,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _focusAnimation = Tween<double>(
       begin: 1.5,
       end: 1.0,
@@ -48,7 +48,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
       parent: _focusAnimationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _captureAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -71,7 +71,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
     });
     _focusAnimationController.reset();
     _focusAnimationController.forward();
-    
+
     // 실제로는 여기서 카메라 포커스 설정
   }
 
@@ -115,15 +115,15 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
                   Text(
                     '카메라 프리뷰',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.7),
-                    ),
+                          color: Colors.white.withOpacity(0.7),
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '실제 구현 시 카메라 플러그인 연동',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.5),
-                    ),
+                          color: Colors.white.withOpacity(0.5),
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -174,7 +174,8 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
           builder: (context, child) {
             return _captureAnimation!.value > 0
                 ? Container(
-                    color: Colors.white.withOpacity(_captureAnimation!.value * 0.5),
+                    color: Colors.white
+                        .withOpacity(_captureAnimation!.value * 0.5),
                   )
                 : const SizedBox.shrink();
           },
@@ -184,7 +185,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
   }
 
   Widget _buildGuideOverlay() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: CustomPaint(
@@ -206,7 +207,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
             onPressed: () => Navigator.pop(context),
           ),
           const Spacer(),
-          
+
           // 플래시 버튼
           _buildControlButton(
             icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
@@ -218,7 +219,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
             },
           ),
           const SizedBox(width: 12),
-          
+
           // 카메라 전환 버튼
           _buildControlButton(
             icon: Icons.flip_camera_ios,
@@ -256,15 +257,15 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
                 Text(
                   '음식을 가이드 안에 맞춰주세요',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // 촬영 버튼과 갤러리 버튼
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -277,7 +278,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
                   // 갤러리에서 이미지 선택 로직
                 },
               ),
-              
+
               // 촬영 버튼
               GestureDetector(
                 onTap: _onCapture,
@@ -316,7 +317,7 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
                   ),
                 ),
               ),
-              
+
               // AI 설정 버튼
               _buildBottomActionButton(
                 icon: Icons.settings,
@@ -380,9 +381,9 @@ class _CameraPreviewWidgetState extends State<CameraPreviewWidget>
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
@@ -481,7 +482,7 @@ class CameraStatusIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isReady 
+        color: isReady
             ? Colors.green.withOpacity(0.9)
             : Colors.orange.withOpacity(0.9),
         borderRadius: BorderRadius.circular(16),
@@ -498,9 +499,9 @@ class CameraStatusIndicator extends StatelessWidget {
           Text(
             status,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),

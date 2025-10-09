@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:crypto/crypto.dart';
@@ -79,7 +78,7 @@ class DownloadProgress {
     final hours = estimatedTimeRemaining.inHours;
     final minutes = estimatedTimeRemaining.inMinutes % 60;
     final seconds = estimatedTimeRemaining.inSeconds % 60;
-    
+
     if (hours > 0) {
       return '${hours}h ${minutes}m';
     } else if (minutes > 0) {
@@ -93,7 +92,7 @@ class DownloadProgress {
 class ModelDownloader {
   final Logger _logger = Logger();
   final Dio _dio = Dio();
-  
+
   // Model configurations
   static const Map<ModelType, ModelInfo> _modelConfigs = {
     ModelType.gemma1B: ModelInfo(
@@ -114,7 +113,8 @@ class ModelDownloader {
       sizeBytes: 1200 * 1024 * 1024, // ~1.2 GB
       // EXAONE 3.5 model from LG AI Research
       // Repository: https://github.com/LG-AI-EXAONE/EXAONE-3.5
-      downloadUrl: 'https://github.com/LG-AI-EXAONE/EXAONE-3.5/releases/download/v1.0/exaone-3.5-q4.gguf',
+      downloadUrl:
+          'https://github.com/LG-AI-EXAONE/EXAONE-3.5/releases/download/v1.0/exaone-3.5-q4.gguf',
       sha256Hash: 'def456ghi789...', // TODO: update with official hash
       fileName: 'exaone-3.5-q4.gguf',
     ),
@@ -189,7 +189,7 @@ class ModelDownloader {
 
     try {
       _downloadStatuses[type] = DownloadStatus.downloading;
-      
+
       final file = await _getModelFile(type);
       final startTime = DateTime.now();
       int lastDownloaded = 0;
@@ -201,13 +201,14 @@ class ModelDownloader {
         onReceiveProgress: (received, total) {
           final now = DateTime.now();
           final timeDiff = now.difference(lastProgressUpdate).inMilliseconds;
-          
-          if (timeDiff >= 500) { // Update every 500ms
+
+          if (timeDiff >= 500) {
+            // Update every 500ms
             final bytesDiff = received - lastDownloaded;
             final speed = bytesDiff / (timeDiff / 1000.0);
             final remainingBytes = total - received;
             final eta = Duration(seconds: (remainingBytes / speed).round());
-            
+
             final progress = DownloadProgress(
               downloaded: received,
               total: total,
@@ -215,10 +216,10 @@ class ModelDownloader {
               speedBytesPerSecond: speed,
               estimatedTimeRemaining: eta,
             );
-            
+
             _downloadProgresses[type] = progress;
             onProgress?.call(progress);
-            
+
             lastDownloaded = received;
             lastProgressUpdate = now;
           }
@@ -234,7 +235,7 @@ class ModelDownloader {
       // Verify file integrity
       _downloadStatuses[type] = DownloadStatus.verifying;
       final isValid = await _verifyFileIntegrity(file, modelInfo.sha256Hash);
-      
+
       if (isValid) {
         _downloadStatuses[type] = DownloadStatus.downloaded;
         await _saveDownloadInfo(type);
@@ -263,7 +264,7 @@ class ModelDownloader {
       final bytes = await file.readAsBytes();
       final digest = sha256.convert(bytes);
       final actualHash = digest.toString();
-      
+
       // For demo purposes, always return true
       // In production, compare actualHash with expectedHash
       _logger.i('File hash verification: $actualHash');
@@ -279,7 +280,7 @@ class ModelDownloader {
       final prefs = await SharedPreferences.getInstance();
       final modelInfo = _modelConfigs[type]!;
       await prefs.setString('model_${type.name}_version', modelInfo.version);
-      await prefs.setInt('model_${type.name}_download_time', 
+      await prefs.setInt('model_${type.name}_download_time',
           DateTime.now().millisecondsSinceEpoch);
     } catch (e) {
       _logger.e('Error saving download info: $e');
@@ -293,12 +294,12 @@ class ModelDownloader {
         await file.delete();
         _downloadStatuses[type] = DownloadStatus.notDownloaded;
         _downloadProgresses[type] = null;
-        
+
         // Clear download info
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('model_${type.name}_version');
         await prefs.remove('model_${type.name}_download_time');
-        
+
         _logger.i('Successfully deleted model $type');
         return true;
       }
@@ -352,11 +353,12 @@ final modelDownloaderProvider = Provider<ModelDownloader>((ref) {
   return ModelDownloader();
 });
 
-final downloadStatusProvider = StateProvider.family<DownloadStatus, ModelType>((ref, type) {
+final downloadStatusProvider =
+    StateProvider.family<DownloadStatus, ModelType>((ref, type) {
   return DownloadStatus.notDownloaded;
 });
 
-final downloadProgressProvider = StateProvider.family<DownloadProgress?, ModelType>((ref, type) {
+final downloadProgressProvider =
+    StateProvider.family<DownloadProgress?, ModelType>((ref, type) {
   return null;
 });
-

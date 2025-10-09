@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 // ML Kit dependencies removed - using mock implementation
-import 'dart:io';
 
 class MedicationScreen extends ConsumerStatefulWidget {
   const MedicationScreen({super.key});
@@ -14,8 +13,8 @@ class MedicationScreen extends ConsumerStatefulWidget {
 class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   final ImagePicker _picker = ImagePicker();
   // ML Kit removed - using mock implementation
-  
-  List<MedicationInfo> _medications = [];
+
+  final List<MedicationInfo> _medications = [];
   bool _isProcessing = false;
 
   @override
@@ -52,7 +51,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   Future<void> _processMockScanResult(String imagePath) async {
     // Simulate processing delay
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // Mock medication data - in production, use actual OCR/barcode service
     final mockMedication = MedicationInfo(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -65,7 +64,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
       contraindications: ['간질환', '알코올 중독'],
       interactions: ['와파린', '이소니아지드'],
     );
-    
+
     setState(() {
       _medications.add(mockMedication);
     });
@@ -75,7 +74,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
   Future<MedicationInfo?> _lookupMedicationByBarcode(String barcode) async {
     // Simulate API call to medication database
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // Mock data
     final mockMedications = {
       '8801234567890': MedicationInfo(
@@ -90,16 +89,17 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
         interactions: ['와파린', '이소니아지드'],
       ),
     };
-    
+
     return mockMedications[barcode];
   }
 
   Future<MedicationInfo?> _extractMedicationFromText(String text) async {
     // Simulate text analysis and medication extraction
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // Simple keyword matching (in production, use more sophisticated NLP)
-    if (text.toLowerCase().contains('타이레놀') || text.toLowerCase().contains('acetaminophen')) {
+    if (text.toLowerCase().contains('타이레놀') ||
+        text.toLowerCase().contains('acetaminophen')) {
       return MedicationInfo(
         id: '2',
         name: '타이레놀',
@@ -112,7 +112,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
         interactions: ['와파린', '이소니아지드'],
       );
     }
-    
+
     return null;
   }
 
@@ -159,7 +159,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
               onPressed: _isProcessing ? null : _scanMedication,
-              icon: _isProcessing 
+              icon: _isProcessing
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -172,7 +172,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               ),
             ),
           ),
-          
+
           // Instructions
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -191,9 +191,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '사용 방법',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -207,9 +208,9 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Medications List
           Expanded(
             child: _medications.isEmpty
@@ -225,16 +226,22 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                         const SizedBox(height: 16),
                         Text(
                           '등록된 약물이 없습니다',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '약물을 스캔하여 정보를 등록해보세요',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                       ],
                     ),
@@ -270,15 +277,15 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
                       Text(
                         medication.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${medication.activeIngredient} ${medication.dosage}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                       Text(
                         medication.manufacturer,
@@ -342,7 +349,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
-            
+
             // Side Effects
             if (medication.sideEffects.isNotEmpty) ...[
               _buildInfoSection(
@@ -353,7 +360,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               ),
               const SizedBox(height: 8),
             ],
-            
+
             // Contraindications
             if (medication.contraindications.isNotEmpty) ...[
               _buildInfoSection(
@@ -364,7 +371,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               ),
               const SizedBox(height: 8),
             ],
-            
+
             // Drug Interactions
             if (medication.interactions.isNotEmpty) ...[
               _buildInfoSection(
@@ -380,7 +387,8 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
     );
   }
 
-  Widget _buildInfoSection(String title, String content, IconData icon, Color color) {
+  Widget _buildInfoSection(
+      String title, String content, IconData icon, Color color) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -393,9 +401,9 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
               ),
               Text(
                 content,
@@ -474,4 +482,3 @@ class MedicationInfo {
     required this.interactions,
   });
 }
-

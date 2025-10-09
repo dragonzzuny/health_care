@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/router/app_router.dart';
+import '../providers/developer_mode_provider.dart';
 
-class MainNavigation extends StatelessWidget {
+class MainNavigation extends ConsumerWidget {
   final Widget child;
 
   const MainNavigation({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: child,
       bottomNavigationBar: BottomNavigationBar(
@@ -38,11 +40,12 @@ class MainNavigation extends StatelessWidget {
           ),
         ],
       ),
-      drawer: _buildDrawer(context),
+      drawer: _buildDrawer(context, ref),
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(BuildContext context, WidgetRef ref) {
+    final isDeveloperMode = ref.watch(developerModeProvider);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -140,6 +143,51 @@ class MainNavigation extends StatelessWidget {
               context.go(AppRoutes.login);
             },
           ),
+          const Divider(),
+          SwitchListTile(
+            secondary: const Icon(Icons.developer_mode),
+            title: const Text('개발자 모드'),
+            subtitle: Text(isDeveloperMode ? '활성화됨' : '비활성화됨'),
+            value: isDeveloperMode,
+            onChanged: (bool value) {
+              ref.read(developerModeProvider.notifier).toggle();
+            },
+          ),
+          if (isDeveloperMode) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                '개발자 옵션',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.storage),
+              title: const Text('데이터베이스 확인'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go(AppRoutes.databaseDebug);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report),
+              title: const Text('로그 뷰어'),
+              trailing: const Chip(
+                label: Text('준비중', style: TextStyle(fontSize: 10)),
+                padding: EdgeInsets.symmetric(horizontal: 8),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('로그 뷰어 기능 준비 중입니다')),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

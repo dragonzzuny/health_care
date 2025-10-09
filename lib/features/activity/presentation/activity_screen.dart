@@ -36,7 +36,7 @@ class ActivityScreen extends ConsumerWidget {
             // Welcome Card
             _buildWelcomeCard(context),
             const SizedBox(height: 16),
-            
+
             // Today's Summary
             _buildTodaySummary(context, ref),
             const SizedBox(height: 16),
@@ -44,11 +44,11 @@ class ActivityScreen extends ConsumerWidget {
             // Today's Food Summary
             _buildTodaysFoodSummary(context, ref),
             const SizedBox(height: 16),
-            
+
             // Quick Actions
             _buildQuickActions(context),
             const SizedBox(height: 16),
-            
+
             // Recent Activities
             _buildRecentActivities(context, ref),
           ],
@@ -79,16 +79,16 @@ class ActivityScreen extends ConsumerWidget {
             Text(
               '안녕하세요! 👋',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               '오늘도 건강한 하루를 시작해보세요',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white.withOpacity(0.9),
-              ),
+                    color: Colors.white.withOpacity(0.9),
+                  ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -102,8 +102,8 @@ class ActivityScreen extends ConsumerWidget {
                 Text(
                   '오늘 날씨: 맑음 22°C',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
+                        color: Colors.white.withOpacity(0.9),
+                      ),
                 ),
               ],
             ),
@@ -116,18 +116,17 @@ class ActivityScreen extends ConsumerWidget {
   Widget _buildTodaySummary(BuildContext context, WidgetRef ref) {
     final todayGoalProgress = ref.watch(todayGoalProgressProvider);
     final todayActivitySummary = ref.watch(todayActivitySummaryProvider);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '오늘의 활동',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 12),
-        
         todayActivitySummary.when(
           data: (summary) => todayGoalProgress.when(
             data: (progress) {
@@ -135,7 +134,7 @@ class ActivityScreen extends ConsumerWidget {
               final calories = summary['calories']?.toInt() ?? 0;
               final activeMinutes = summary['activeMinutes']?.toInt() ?? 0;
               final distance = summary['distance']?.toDouble() ?? 0.0;
-              
+
               return Column(
                 children: [
                   Row(
@@ -159,7 +158,8 @@ class ActivityScreen extends ConsumerWidget {
                           title: '칼로리',
                           value: calories.toString(),
                           unit: 'kcal',
-                          progress: progress['calories']?.clamp(0.0, 1.0) ?? 0.0,
+                          progress:
+                              progress['calories']?.clamp(0.0, 1.0) ?? 0.0,
                           color: Colors.orange,
                         ),
                       ),
@@ -175,7 +175,8 @@ class ActivityScreen extends ConsumerWidget {
                           title: '활동 시간',
                           value: activeMinutes.toString(),
                           unit: '분',
-                          progress: progress['activeMinutes']?.clamp(0.0, 1.0) ?? 0.0,
+                          progress:
+                              progress['activeMinutes']?.clamp(0.0, 1.0) ?? 0.0,
                           color: Colors.green,
                         ),
                       ),
@@ -187,7 +188,8 @@ class ActivityScreen extends ConsumerWidget {
                           title: '이동 거리',
                           value: distance.toStringAsFixed(1),
                           unit: 'km',
-                          progress: progress['distance']?.clamp(0.0, 1.0) ?? 0.0,
+                          progress:
+                              progress['distance']?.clamp(0.0, 1.0) ?? 0.0,
                           color: Colors.purple,
                         ),
                       ),
@@ -229,8 +231,8 @@ class ActivityScreen extends ConsumerWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
               ],
@@ -239,9 +241,9 @@ class ActivityScreen extends ConsumerWidget {
             Text(
               '$value $unit',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(
@@ -271,8 +273,8 @@ class ActivityScreen extends ConsumerWidget {
             Text(
               '오늘의 식단',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const Spacer(),
             TextButton.icon(
@@ -290,7 +292,8 @@ class ActivityScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -303,7 +306,10 @@ class ActivityScreen extends ConsumerWidget {
                     gradient: LinearGradient(
                       colors: [
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                        Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withOpacity(0.1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -321,24 +327,29 @@ class ActivityScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'AI가 분석한 음식을 바로 기록해보세요!',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           'NEW',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                     ],
@@ -349,10 +360,12 @@ class ActivityScreen extends ConsumerWidget {
                 // 칼로리 요약
                 todayNutrition.when(
                   data: (nutrition) {
-                    final totalCalories = nutrition?.totalCalories?.round() ?? 0;
-                    final calorieGoal = nutrition?.calorieGoal?.round() ?? 1800;
-                    final progress = calorieGoal > 0 ? (totalCalories / calorieGoal).clamp(0.0, 1.0) : 0.0;
-                    
+                    final totalCalories = nutrition?.totalCalories.round() ?? 0;
+                    final calorieGoal = nutrition?.calorieGoal.round() ?? 1800;
+                    final progress = calorieGoal > 0
+                        ? (totalCalories / calorieGoal).clamp(0.0, 1.0)
+                        : 0.0;
+
                     return Row(
                       children: [
                         Expanded(
@@ -361,9 +374,14 @@ class ActivityScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 '오늘 섭취한 칼로리',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                               ),
                               const SizedBox(height: 4),
                               Row(
@@ -371,18 +389,29 @@ class ActivityScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     totalCalories.toString(),
-                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 4, left: 4),
+                                    padding: const EdgeInsets.only(
+                                        bottom: 4, left: 4),
                                     child: Text(
                                       '/ $calorieGoal kcal',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -400,7 +429,9 @@ class ActivityScreen extends ConsumerWidget {
                                 child: CircularProgressIndicator(
                                   value: progress,
                                   strokeWidth: 6,
-                                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     Theme.of(context).colorScheme.primary,
                                   ),
@@ -409,10 +440,15 @@ class ActivityScreen extends ConsumerWidget {
                               Center(
                                 child: Text(
                                   '${(progress * 100).round()}%',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
                                 ),
                               ),
                             ],
@@ -429,9 +465,14 @@ class ActivityScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '오늘 섭취한 칼로리',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             const CircularProgressIndicator(),
@@ -453,9 +494,14 @@ class ActivityScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '오늘 섭취한 칼로리',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             const Text('오류'),
@@ -477,36 +523,49 @@ class ActivityScreen extends ConsumerWidget {
                         children: [
                           Text(
                             '최근 식단',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           const SizedBox(height: 8),
-                          
+
                           // 실제 식사 데이터 사용
                           todayMeals.when(
                             data: (meals) {
                               if (meals.isEmpty) {
                                 return Text(
                                   '오늘 아직 식사 기록이 없습니다',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.grey,
+                                      ),
                                 );
                               }
-                              
+
                               // 최근 3개 식사만 표시
                               final recentMeals = meals.take(3).toList();
-                              
+
                               return Column(
-                                children: recentMeals.asMap().entries.map((entry) {
+                                children:
+                                    recentMeals.asMap().entries.map((entry) {
                                   final meal = entry.value;
                                   final calories = _calculateMealCalories(meal);
-                                  final time = _formatTime(meal.entry.timestamp);
-                                  final mealTypeName = _getMealTypeName(meal.entry.mealType);
-                                  
+                                  final time =
+                                      _formatTime(meal.entry.timestamp);
+                                  final mealTypeName =
+                                      _getMealTypeName(meal.entry.mealType);
+
                                   return Padding(
-                                    padding: EdgeInsets.only(bottom: entry.key < recentMeals.length - 1 ? 6.0 : 0.0),
+                                    padding: EdgeInsets.only(
+                                        bottom:
+                                            entry.key < recentMeals.length - 1
+                                                ? 6.0
+                                                : 0.0),
                                     child: _buildRecentMealItem(
                                       context,
                                       mealTypeName,
@@ -521,9 +580,12 @@ class ActivityScreen extends ConsumerWidget {
                             loading: () => const CircularProgressIndicator(),
                             error: (_, __) => Text(
                               '식사 데이터를 불러올 수 없습니다',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.red,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.red,
+                                  ),
                             ),
                           ),
                         ],
@@ -540,7 +602,10 @@ class ActivityScreen extends ConsumerWidget {
                             gradient: LinearGradient(
                               colors: [
                                 Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.8),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -548,7 +613,10 @@ class ActivityScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -573,10 +641,13 @@ class ActivityScreen extends ConsumerWidget {
                                   const SizedBox(height: 4),
                                   Text(
                                     'AI 촬영',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -587,9 +658,12 @@ class ActivityScreen extends ConsumerWidget {
                         Text(
                           '음식 촬영하고\n영양 정보 확인',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                         ),
                       ],
                     ),
@@ -603,7 +677,8 @@ class ActivityScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecentMealItem(BuildContext context, String mealType, String foodName, String calories, String time) {
+  Widget _buildRecentMealItem(BuildContext context, String mealType,
+      String foodName, String calories, String time) {
     return Row(
       children: [
         Container(
@@ -622,14 +697,14 @@ class ActivityScreen extends ConsumerWidget {
               Text(
                 '$mealType • $time',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
               Text(
                 foodName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -639,9 +714,9 @@ class ActivityScreen extends ConsumerWidget {
         Text(
           calories,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
       ],
     );
@@ -669,14 +744,15 @@ class ActivityScreen extends ConsumerWidget {
         Text(
           '빠른 실행',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: _buildActionCard(context,
+              child: _buildActionCard(
+                context,
                 icon: Icons.camera_alt,
                 title: 'AI 음식 인식',
                 subtitle: '사진으로 영양 분석',
@@ -688,7 +764,8 @@ class ActivityScreen extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildActionCard(context,
+              child: _buildActionCard(
+                context,
                 icon: Icons.chat,
                 title: 'AI 상담',
                 subtitle: '건강 상담받기',
@@ -704,7 +781,8 @@ class ActivityScreen extends ConsumerWidget {
         Row(
           children: [
             Expanded(
-              child: _buildActionCard(context,
+              child: _buildActionCard(
+                context,
                 icon: Icons.fitness_center,
                 title: '운동 시작',
                 subtitle: '맞춤 운동하기',
@@ -715,7 +793,8 @@ class ActivityScreen extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildActionCard(context,
+              child: _buildActionCard(
+                context,
                 icon: Icons.assessment,
                 title: '건강 리포트',
                 subtitle: '분석 결과 보기',
@@ -730,7 +809,8 @@ class ActivityScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, {
+  Widget _buildActionCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
@@ -790,36 +870,44 @@ class ActivityScreen extends ConsumerWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isAI ? Theme.of(context).colorScheme.primary : null,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isAI ? Theme.of(context).colorScheme.primary : null,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isAI
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
-                        : null,
-                  ),
+                        color: isAI
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.8)
+                            : null,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 if (isAI) ...[
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       'AI',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                   ),
                 ],
@@ -839,8 +927,8 @@ class ActivityScreen extends ConsumerWidget {
         Text(
           '최근 활동',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 12),
         recentWorkouts.when(
@@ -860,22 +948,22 @@ class ActivityScreen extends ConsumerWidget {
                       Text(
                         '최근 운동 기록이 없습니다',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey,
-                        ),
+                              color: Colors.grey,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '새 운동을 시작해보세요!',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.withOpacity(0.7),
-                        ),
+                              color: Colors.grey.withOpacity(0.7),
+                            ),
                       ),
                     ],
                   ),
                 ),
               );
             }
-            
+
             return Card(
               child: ListView.separated(
                 shrinkWrap: true,
@@ -887,7 +975,7 @@ class ActivityScreen extends ConsumerWidget {
                   final icon = _getWorkoutIcon(workout.type);
                   final color = _getWorkoutColor(workout.type);
                   final timeFormatted = _formatTime(workout.startTime);
-                  
+
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: color.withOpacity(0.1),
@@ -900,8 +988,8 @@ class ActivityScreen extends ConsumerWidget {
                     title: Text(
                       workout.name,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                     subtitle: Text(
                       '${workout.duration}분 • ${workout.caloriesBurned} kcal',
@@ -945,15 +1033,15 @@ class ActivityScreen extends ConsumerWidget {
                   Text(
                     '운동 기록을 불러올 수 없습니다',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.red,
-                    ),
+                          color: Colors.red,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     error.toString(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+                          color: Colors.grey,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -964,7 +1052,7 @@ class ActivityScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   // 로딩 상태의 요약 카드들
   Widget _buildLoadingSummaryCards(BuildContext context) {
     return Column(
@@ -987,7 +1075,7 @@ class ActivityScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   Widget _buildLoadingSummaryCard(BuildContext context) {
     return Card(
       child: Padding(
@@ -1002,8 +1090,8 @@ class ActivityScreen extends ConsumerWidget {
                 Text(
                   '로딩 중...',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
+                        color: Colors.grey,
+                      ),
                 ),
               ],
             ),
@@ -1014,7 +1102,7 @@ class ActivityScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   // 에러 상태의 요약 카드들
   Widget _buildErrorSummaryCards(BuildContext context) {
     return Column(
@@ -1037,7 +1125,7 @@ class ActivityScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   Widget _buildErrorSummaryCard(BuildContext context) {
     return Card(
       child: Padding(
@@ -1052,8 +1140,8 @@ class ActivityScreen extends ConsumerWidget {
                 Text(
                   '오류',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.red,
-                  ),
+                        color: Colors.red,
+                      ),
                 ),
               ],
             ),
@@ -1061,15 +1149,15 @@ class ActivityScreen extends ConsumerWidget {
             Text(
               '데이터를 불러올 수\n없습니다',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+                    color: Colors.grey,
+                  ),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   // 숫자 포매팅 헬퍼
   String _formatNumber(int number) {
     if (number >= 1000) {
@@ -1077,52 +1165,70 @@ class ActivityScreen extends ConsumerWidget {
     }
     return number.toString();
   }
-  
+
   // 식사 칼로리 계산
   double _calculateMealCalories(FoodEntryWithFood meal) {
     return meal.entry.portionGrams * meal.food.kcalPer100g / 100;
   }
-  
+
   // 시간 포매팅
   String _formatTime(DateTime dateTime) {
     return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
   }
-  
+
   // 식사 타입 이름 변환
   String _getMealTypeName(String mealType) {
     switch (mealType) {
-      case 'breakfast': return '아침';
-      case 'lunch': return '점심';
-      case 'dinner': return '저녁';
-      case 'snack': return '간식';
-      default: return mealType;
+      case 'breakfast':
+        return '아침';
+      case 'lunch':
+        return '점심';
+      case 'dinner':
+        return '저녁';
+      case 'snack':
+        return '간식';
+      default:
+        return mealType;
     }
   }
-  
+
   // 운동 타입 아이콘
   IconData _getWorkoutIcon(String workoutType) {
     switch (workoutType) {
-      case 'running': return Icons.directions_run;
-      case 'cycling': return Icons.directions_bike;
-      case 'swimming': return Icons.pool;
-      case 'strength_training': return Icons.fitness_center;
-      case 'walking': return Icons.directions_walk;
-      case 'yoga': return Icons.self_improvement;
-      default: return Icons.sports;
+      case 'running':
+        return Icons.directions_run;
+      case 'cycling':
+        return Icons.directions_bike;
+      case 'swimming':
+        return Icons.pool;
+      case 'strength_training':
+        return Icons.fitness_center;
+      case 'walking':
+        return Icons.directions_walk;
+      case 'yoga':
+        return Icons.self_improvement;
+      default:
+        return Icons.sports;
     }
   }
-  
+
   // 운동 타입 색상
   Color _getWorkoutColor(String workoutType) {
     switch (workoutType) {
-      case 'running': return Colors.red;
-      case 'cycling': return Colors.blue;
-      case 'swimming': return Colors.cyan;
-      case 'strength_training': return Colors.orange;
-      case 'walking': return Colors.green;
-      case 'yoga': return Colors.purple;
-      default: return Colors.grey;
+      case 'running':
+        return Colors.red;
+      case 'cycling':
+        return Colors.blue;
+      case 'swimming':
+        return Colors.cyan;
+      case 'strength_training':
+        return Colors.orange;
+      case 'walking':
+        return Colors.green;
+      case 'yoga':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 }
-

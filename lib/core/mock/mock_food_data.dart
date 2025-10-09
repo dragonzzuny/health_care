@@ -1,10 +1,8 @@
 import 'dart:math';
-import '../database/app_database.dart';
-import 'package:drift/drift.dart';
 
 class MockFoodData {
   static const String userId = 'user_001';
-  
+
   // 가상 사용자: 김건강 (35세, 남성, 체중감량 목표)
   static const Map<String, dynamic> userProfile = {
     'name': '김건강',
@@ -55,7 +53,7 @@ class MockFoodData {
 
     for (int dayOffset = 6; dayOffset >= 0; dayOffset--) {
       final date = now.subtract(Duration(days: dayOffset));
-      
+
       // 아침 식사 (7:30 AM)
       final breakfastTime = DateTime(date.year, date.month, date.day, 7, 30);
       final breakfast = breakfastOptions[dayOffset % breakfastOptions.length];
@@ -200,26 +198,29 @@ class MockFoodData {
   static List<Map<String, dynamic>> getNutritionGoalProgress() {
     final progress = <Map<String, dynamic>>[];
     final now = DateTime.now();
-    
+
     for (int dayOffset = 6; dayOffset >= 0; dayOffset--) {
-      final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: dayOffset));
-      
+      final date = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: dayOffset));
+
       // 랜덤하지만 현실적인 달성률 생성
       final calorieProgress = 0.75 + (dayOffset * 0.05) % 0.4; // 75% ~ 115%
       final proteinProgress = 0.8 + (dayOffset * 0.03) % 0.3; // 80% ~ 110%
       final carbsProgress = 0.7 + (dayOffset * 0.04) % 0.35; // 70% ~ 105%
       final fatProgress = 0.65 + (dayOffset * 0.06) % 0.45; // 65% ~ 110%
-      
+
       progress.add({
         'date': date,
         'calorieGoalProgress': calorieProgress,
         'proteinGoalProgress': proteinProgress,
         'carbsGoalProgress': carbsProgress,
         'fatGoalProgress': fatProgress,
-        'overallScore': (calorieProgress + proteinProgress + carbsProgress + fatProgress) / 4,
+        'overallScore':
+            (calorieProgress + proteinProgress + carbsProgress + fatProgress) /
+                4,
       });
     }
-    
+
     return progress;
   }
 }

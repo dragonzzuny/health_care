@@ -87,9 +87,9 @@ class _SleepScreenState extends State<SleepScreen> {
                 Text(
                   '어젯밤 수면',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -103,21 +103,25 @@ class _SleepScreenState extends State<SleepScreen> {
                       Text(
                         '총 수면시간',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
+                              color: Colors.white.withOpacity(0.8),
+                            ),
                       ),
                       Text(
                         '7시간 32분',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(16),
@@ -196,19 +200,19 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               '수면 품질 추이',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
-            Container(
+            SizedBox(
               height: 200,
               child: Center(
                 child: Text(
                   '수면 품질 차트\n(실제 구현 시 charts_flutter 패키지 사용)',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ),
             ),
@@ -246,9 +250,9 @@ class _SleepScreenState extends State<SleepScreen> {
         Text(
           value,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
         ),
       ],
     );
@@ -264,8 +268,8 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               '수면 단계 분석',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             _buildStageItem(
@@ -321,8 +325,8 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -348,9 +352,9 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               duration,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             Text(
               percentage,
@@ -378,8 +382,8 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               '수면 개선 팁',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             _buildTipItem(
@@ -408,7 +412,8 @@ class _SleepScreenState extends State<SleepScreen> {
     );
   }
 
-  Widget _buildTipItem(String title, String description, IconData icon, Color color) {
+  Widget _buildTipItem(
+      String title, String description, IconData icon, Color color) {
     return Row(
       children: [
         Container(
@@ -427,14 +432,14 @@ class _SleepScreenState extends State<SleepScreen> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),
@@ -453,8 +458,8 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               '수면 기록',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
             ListView.separated(
@@ -464,13 +469,48 @@ class _SleepScreenState extends State<SleepScreen> {
               separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {
                 final sleepData = [
-                  {'date': '어제', 'duration': '7h 32m', 'quality': '좋음', 'color': Colors.green},
-                  {'date': '2일 전', 'duration': '6h 45m', 'quality': '보통', 'color': Colors.orange},
-                  {'date': '3일 전', 'duration': '8h 15m', 'quality': '매우 좋음', 'color': Colors.green},
-                  {'date': '4일 전', 'duration': '5h 30m', 'quality': '나쁨', 'color': Colors.red},
-                  {'date': '5일 전', 'duration': '7h 20m', 'quality': '좋음', 'color': Colors.green},
-                  {'date': '6일 전', 'duration': '6h 55m', 'quality': '보통', 'color': Colors.orange},
-                  {'date': '7일 전', 'duration': '7h 45m', 'quality': '좋음', 'color': Colors.green},
+                  {
+                    'date': '어제',
+                    'duration': '7h 32m',
+                    'quality': '좋음',
+                    'color': Colors.green
+                  },
+                  {
+                    'date': '2일 전',
+                    'duration': '6h 45m',
+                    'quality': '보통',
+                    'color': Colors.orange
+                  },
+                  {
+                    'date': '3일 전',
+                    'duration': '8h 15m',
+                    'quality': '매우 좋음',
+                    'color': Colors.green
+                  },
+                  {
+                    'date': '4일 전',
+                    'duration': '5h 30m',
+                    'quality': '나쁨',
+                    'color': Colors.red
+                  },
+                  {
+                    'date': '5일 전',
+                    'duration': '7h 20m',
+                    'quality': '좋음',
+                    'color': Colors.green
+                  },
+                  {
+                    'date': '6일 전',
+                    'duration': '6h 55m',
+                    'quality': '보통',
+                    'color': Colors.orange
+                  },
+                  {
+                    'date': '7일 전',
+                    'duration': '7h 45m',
+                    'quality': '좋음',
+                    'color': Colors.green
+                  },
                 ];
 
                 final sleep = sleepData[index];
@@ -487,12 +527,13 @@ class _SleepScreenState extends State<SleepScreen> {
                   title: Text(
                     sleep['date'] as String,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   subtitle: Text(sleep['duration'] as String),
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: (sleep['color'] as Color).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -526,8 +567,8 @@ class _SleepScreenState extends State<SleepScreen> {
             Text(
               '수면 추적',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -565,4 +606,3 @@ class _SleepScreenState extends State<SleepScreen> {
     );
   }
 }
-
