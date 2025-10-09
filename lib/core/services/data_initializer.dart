@@ -78,17 +78,38 @@ class DataInitializer {
     if (count == 0) {
       // 식사 기록 추가
       for (var meal in mealData) {
-        await _db.into(_db.foodEntries).insert(
-              FoodEntriesCompanion(
-                userId: Value(meal['userId']),
-                foodId: Value(meal['foodId']),
-                portionGrams: Value(meal['portionGrams']),
-                mealType: Value(meal['mealType']),
-                timestamp: Value(meal['timestamp']),
-                notes: Value(meal['notes']),
-                // 영양 정보는 트리거나 서비스에서 자동 계산됨
-              ),
-            );
+        final foodId = meal['foodId'] as int;
+        final portionGrams = meal['portionGrams'] as double;
+
+        // 음식 정보 조회하여 영양소 계산
+        final food = await (_db.select(_db.foods)
+              ..where((f) => f.id.equals(foodId)))
+            .getSingleOrNull();
+
+        if (food != null) {
+          // 실제 섭취량 기준 영양소 계산
+          final totalCalories = (food.kcalPer100g * portionGrams) / 100;
+          final totalCarbs = (food.carbsPer100g * portionGrams) / 100;
+          final totalProtein = (food.proteinPer100g * portionGrams) / 100;
+          final totalFat = (food.fatPer100g * portionGrams) / 100;
+          final totalFiber = (food.fiberPer100g * portionGrams) / 100;
+
+          await _db.into(_db.foodEntries).insert(
+                FoodEntriesCompanion(
+                  userId: Value(meal['userId']),
+                  foodId: Value(foodId),
+                  portionGrams: Value(portionGrams),
+                  mealType: Value(meal['mealType']),
+                  timestamp: Value(meal['timestamp']),
+                  notes: Value(meal['notes']),
+                  totalCalories: Value(totalCalories),
+                  totalCarbs: Value(totalCarbs),
+                  totalProtein: Value(totalProtein),
+                  totalFat: Value(totalFat),
+                  totalFiber: Value(totalFiber),
+                ),
+              );
+        }
       }
       print('✅ 식사 기록 ${mealData.length}건 추가 완료');
 
@@ -300,20 +321,42 @@ class DataInitializer {
         .getSingleOrNull();
 
     if (existingBreakfast == null) {
-      await _db.into(_db.foodEntries).insert(
-            FoodEntriesCompanion(
-              userId: const Value(MockFoodData.userId),
-              foodId: const Value(1), // 김치찌개
-              portionGrams: const Value(150.0),
-              mealType: const Value('breakfast'),
-              timestamp: Value(today.add(const Duration(hours: 8))),
-              notes: const Value('오늘 아침식사 - 김치찌개'),
-            ),
-          );
+      const foodId = 1; // 김치찌개
+      const portionGrams = 150.0;
 
-      // 영양 요약 업데이트
-      await _updateDailyNutritionSummary(MockFoodData.userId, today);
-      print('✅ 오늘 아침식사 추가 완료');
+      // 음식 정보 조회하여 영양소 계산
+      final food = await (_db.select(_db.foods)
+            ..where((f) => f.id.equals(foodId)))
+          .getSingleOrNull();
+
+      if (food != null) {
+        // 실제 섭취량 기준 영양소 계산
+        final totalCalories = (food.kcalPer100g * portionGrams) / 100;
+        final totalCarbs = (food.carbsPer100g * portionGrams) / 100;
+        final totalProtein = (food.proteinPer100g * portionGrams) / 100;
+        final totalFat = (food.fatPer100g * portionGrams) / 100;
+        final totalFiber = (food.fiberPer100g * portionGrams) / 100;
+
+        await _db.into(_db.foodEntries).insert(
+              FoodEntriesCompanion(
+                userId: const Value(MockFoodData.userId),
+                foodId: const Value(foodId),
+                portionGrams: const Value(portionGrams),
+                mealType: const Value('breakfast'),
+                timestamp: Value(today.add(const Duration(hours: 8))),
+                notes: const Value('오늘 아침식사 - 김치찌개'),
+                totalCalories: Value(totalCalories),
+                totalCarbs: Value(totalCarbs),
+                totalProtein: Value(totalProtein),
+                totalFat: Value(totalFat),
+                totalFiber: Value(totalFiber),
+              ),
+            );
+
+        // 영양 요약 업데이트
+        await _updateDailyNutritionSummary(MockFoodData.userId, today);
+        print('✅ 오늘 아침식사 추가 완료');
+      }
     }
   }
 
