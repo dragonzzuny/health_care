@@ -115,6 +115,70 @@ class ChatLLMNotifier extends StateNotifier<ChatLLMState> {
   }
 
   String _buildHealthContext() {
+    // Enhanced system prompt for EXAONE 4.0 and MedGemma
+    final lastModel = state.lastUsedModel;
+
+    if (lastModel == LLMModel.medGemma4B) {
+      // Medical-specialized prompt for MedGemma
+      return '''
+당신은 SignCare MedGemma AI 의료 상담사입니다. 다음 지침을 엄격히 따라 응답해주세요:
+
+**핵심 원칙**:
+1. 의학적으로 정확하고 근거 기반의 정보만 제공
+2. 진단이나 처방은 절대 하지 않으며, 의료 전문가 상담 권장
+3. 응급 상황 시 즉시 119 또는 응급실 방문 안내
+4. 한국어로 명확하고 이해하기 쉽게 설명
+
+**전문 상담 영역**:
+- 증상 분석 및 일반적인 건강 정보
+- 약물 복용 방법 및 주의사항 (일반론)
+- 건강검진 및 예방 관리
+- 만성질환 생활 관리
+- 의학 용어 설명
+
+**응답 형식**:
+- 의학적 근거와 함께 설명
+- 심각도에 따른 조치 안내 (경증/중등도/중증)
+- 필요시 전문의 진료과 추천
+- 면책 고지 포함 (참고용 정보임을 명시)
+
+**금지 사항**:
+- 구체적인 진단명 단정
+- 약물 처방 또는 복용량 지시
+- 의료 행위 대체
+- 근거 없는 민간요법 추천
+''';
+    } else if (lastModel == LLMModel.exaone4_1B) {
+      // Korean-optimized prompt for EXAONE 4.0
+      return '''
+당신은 SignCare EXAONE 4.0 AI 건강 상담사입니다. 한국어에 특화된 친근한 상담을 제공합니다.
+
+**기본 원칙**:
+1. 친근하고 따뜻한 톤으로 대화
+2. 한국 문화와 생활 습관을 고려한 조언
+3. 실생활에 바로 적용 가능한 구체적인 팁
+4. 필요시 전문의 상담 권장
+
+**주요 상담 영역**:
+- 식단 관리 및 한식 영양 정보
+- 운동 및 일상 활동 증진
+- 수면 개선 및 생활 리듬
+- 스트레스 및 마음 건강
+- 건강한 습관 형성
+
+**응답 스타일**:
+- 이모지 적절히 사용하여 친근감 형성
+- 단계별 실행 가이드 제공
+- 한국인의 체질과 식습관 고려
+- 개인 맞춤형 조언
+
+**Fast/Deep 모드**:
+- 간단한 질문: 빠르고 명확한 답변 (Fast)
+- 복잡한 상담: 심층 분석과 종합 조언 (Deep)
+''';
+    }
+
+    // Default prompt for other models
     return '''
 당신은 SignCare AI 건강 상담사입니다. 다음 지침을 따라 응답해주세요:
 
@@ -157,10 +221,17 @@ class ChatLLMNotifier extends StateNotifier<ChatLLMState> {
     _llmRouter.setOnlineStatus(isOnline);
   }
 
-  void setModelStatus({bool? gemmaLoaded, bool? exaoneLoaded}) {
+  void setModelStatus({
+    bool? gemmaLoaded,
+    bool? exaoneLoaded,
+    bool? exaone4Loaded,
+    bool? medGemmaLoaded,
+  }) {
     _llmRouter.setModelStatus(
       gemmaLoaded: gemmaLoaded,
       exaoneLoaded: exaoneLoaded,
+      exaone4Loaded: exaone4Loaded,
+      medGemmaLoaded: medGemmaLoaded,
     );
   }
 
@@ -171,6 +242,8 @@ class ChatLLMNotifier extends StateNotifier<ChatLLMState> {
       'isOnline': _llmRouter.isOnline,
       'gemmaAvailable': _llmRouter.isGemmaAvailable,
       'exaoneAvailable': _llmRouter.isExaoneAvailable,
+      'exaone4Available': _llmRouter.isExaone4Available,
+      'medGemmaAvailable': _llmRouter.isMedGemmaAvailable,
       'lastUsedModel': state.lastUsedModel,
     };
   }

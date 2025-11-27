@@ -42,9 +42,13 @@ class ChatMessage {
       case LLMModel.gemma1B:
         return 'Gemma3';
       case LLMModel.exaone24B:
-        return 'EXAONE';
+        return 'EXAONE 3.5';
       case LLMModel.gpt4o:
         return 'GPT-4o';
+      case LLMModel.exaone4_1B:
+        return 'EXAONE 4.0';
+      case LLMModel.medGemma4B:
+        return 'MedGemma';
       case null:
         return '';
     }
@@ -56,9 +60,13 @@ class ChatMessage {
       case LLMModel.gemma1B:
         return const Color(0xFF4CAF50); // Green for Gemma3 (local)
       case LLMModel.exaone24B:
-        return const Color(0xFF2196F3); // Blue for EXAONE (local)
+        return const Color(0xFF2196F3); // Blue for EXAONE 3.5 (local)
       case LLMModel.gpt4o:
         return const Color(0xFFFF9800); // Orange for GPT-4o (cloud)
+      case LLMModel.exaone4_1B:
+        return const Color(0xFF00BCD4); // Cyan for EXAONE 4.0 (local, Korean)
+      case LLMModel.medGemma4B:
+        return const Color(0xFFE91E63); // Pink for MedGemma (medical)
       case null:
         return const Color(0xFF757575); // Grey for unknown
     }

@@ -47,3 +47,8 @@ app.*.map.json
 # Ignore large archive and document files
 *.tar.gz
 *.pdf
+
+# Environment variables (contains sensitive API keys)
+.env
+.env.local
+.env.*.local

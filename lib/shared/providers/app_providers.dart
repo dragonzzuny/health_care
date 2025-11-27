@@ -7,7 +7,6 @@ import '../models/user_model.dart';
 import '../models/health_data_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../features/weather/services/weather_service.dart';
-import '../../features/ai/services/ai_service.dart';
 
 // 음식인식
 final recognizedFoodsProvider = StateProvider<List<Map<String, dynamic>>>((ref) => []);
@@ -92,13 +91,6 @@ final apiServiceProvider = Provider<ApiService>((ref) {
 final weatherServiceProvider = Provider<WeatherService>((ref) {
   final dio = ref.watch(dioProvider);
   return WeatherService(dio);
-});
-
-// AI Service Provider
-final aiServiceProvider = StateNotifierProvider<AIService, AIServiceState>((ref) {
-  final dio = ref.watch(dioProvider);
-  final apiService = ref.watch(apiServiceProvider);
-  return AIService(dio, apiService);
 });
 
 // Shared Preferences Provider
