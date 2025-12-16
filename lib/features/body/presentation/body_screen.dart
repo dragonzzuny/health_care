@@ -30,6 +30,9 @@ class _BodyScreenState extends State<BodyScreen>
         title: const Text('신체 관리'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: '체성분'),
             Tab(text: '운동'),

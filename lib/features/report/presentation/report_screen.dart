@@ -43,6 +43,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: '활동'),
             Tab(text: '식단'),
