@@ -67,6 +67,9 @@ class _FoodScreenState extends ConsumerState<FoodScreen>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(icon: Icon(Icons.camera_alt), text: 'AI 인식'),
             Tab(icon: Icon(Icons.restaurant_menu), text: '식단 기록'),

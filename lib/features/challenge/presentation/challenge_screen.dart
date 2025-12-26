@@ -30,6 +30,9 @@ class _ChallengeScreenState extends State<ChallengeScreen>
         title: const Text('챌린지'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: '진행 중'),
             Tab(text: '리더보드'),

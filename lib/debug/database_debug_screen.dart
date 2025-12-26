@@ -38,6 +38,9 @@ class _DatabaseDebugScreenState extends State<DatabaseDebugScreen> with SingleTi
         title: const Text('데이터베이스 뷰어'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(icon: Icon(Icons.info_outline), text: '개요'),
             Tab(icon: Icon(Icons.table_chart), text: '데이터'),

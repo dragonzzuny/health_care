@@ -42,6 +42,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
         title: const Text('건강 인사이트'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: '활동'),
             Tab(text: '영양'),

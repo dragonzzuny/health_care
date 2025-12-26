@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
+import '../../../shared/providers/app_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -27,17 +28,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    // Loading state is handled by the provider state watching
 
     try {
-      // Simulate login process
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        context.go(AppRoutes.home);
-      }
+      await ref
+          .read(authStateProvider.notifier)
+          .login(_emailController.text, _passwordController.text);
+      // Navigation is handled by router based on auth state
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -46,12 +43,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -64,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       // Simulate social login process
       await Future.delayed(const Duration(seconds: 1));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -94,6 +85,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch global auth state
+    final authState = ref.watch(authStateProvider);
+    final _isLoading = authState.isLoading;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -102,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 60),
-              
+
               // Logo and Title
               Column(
                 children: [
@@ -123,22 +118,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     'SignCare',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '건강한 삶을 위한 스마트 헬스케어',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 48),
-              
+
               // Login Form
               Form(
                 key: _formKey,
@@ -159,14 +154,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         if (value == null || value.isEmpty) {
                           return '이메일을 입력해주세요';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value)) {
                           return '올바른 이메일 형식을 입력해주세요';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -176,7 +172,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                           onPressed: () {
                             setState(() {
@@ -199,7 +197,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       },
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // Forgot Password
                     Align(
                       alignment: Alignment.centerRight,
@@ -212,9 +210,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: const Text('비밀번호를 잊으셨나요?'),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Login Button
                     SizedBox(
                       width: double.infinity,
@@ -232,7 +230,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 height: 24,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 ),
                               )
                             : const Text(
@@ -247,9 +246,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Divider
               Row(
                 children: [
@@ -259,16 +258,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Text(
                       '또는',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ),
                   const Expanded(child: Divider()),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Social Login Buttons
               Column(
                 children: [
@@ -302,9 +302,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Sign Up Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -324,9 +324,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Guest Login
               TextButton(
                 onPressed: () {
@@ -372,8 +372,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: backgroundColor == const Color(0xFFFFE812) 
-              ? backgroundColor 
+          backgroundColor: backgroundColor == const Color(0xFFFFE812)
+              ? backgroundColor
               : Colors.transparent,
         ),
       ),

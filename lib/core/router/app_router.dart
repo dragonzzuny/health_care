@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../shared/providers/app_providers.dart';
 
 // Import feature screens
 import '../../features/auth/presentation/login_screen.dart';
@@ -43,15 +44,40 @@ class AppRoutes {
 
 // Router Provider
 final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authStateProvider);
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    redirect: (context, state) {
+      final isLoggedIn = authState.isAuthenticated;
+      final isLoggingIn = state.uri.toString() == AppRoutes.login;
+      final isRegistering = state.uri.toString() == AppRoutes.register;
+      final isSplash = state.uri.toString() == AppRoutes.splash;
+
+      // Allow splash to do its thing (it navigates manually mostly, or we can just let it finish)
+      // But actually, if we are logged in, we shouldn't be in login/register
+
+      if (isSplash) {
+        return null;
+      }
+
+      if (!isLoggedIn && !isLoggingIn && !isRegistering) {
+        return AppRoutes.login;
+      }
+
+      if (isLoggedIn && (isLoggingIn || isRegistering || isSplash)) {
+        return AppRoutes.home;
+      }
+
+      return null;
+    },
     routes: [
       // Splash Screen
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
       ),
-      
+
       // Auth Routes
       GoRoute(
         path: AppRoutes.login,
@@ -61,13 +87,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
-      
+
       // Debug Routes
       GoRoute(
         path: AppRoutes.databaseDebug,
         builder: (context, state) => const DatabaseDebugScreen(),
       ),
-      
+
       // Main App Shell with Bottom Navigation
       ShellRoute(
         builder: (context, state, child) => MainNavigation(child: child),
@@ -123,7 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
     ],
-    
+
     // Error handling
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('오류')),
@@ -173,7 +199,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeApp() async {
     // Simulate initialization delay
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Check if user is logged in
     // For now, navigate to login
     if (mounted) {
@@ -211,26 +237,26 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // App Name
             Text(
               'SignCare',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
-            
+
             // App Description
             Text(
               'AI 기반 개인 맞춤형 헬스케어',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white.withOpacity(0.8),
-              ),
+                    color: Colors.white.withOpacity(0.8),
+                  ),
             ),
             const SizedBox(height: 48),
-            
+
             // Loading Indicator
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -241,4 +267,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-
