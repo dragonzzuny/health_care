@@ -106,6 +106,7 @@ flutter:
     - assets/models/
     - assets/lottie/
     - assets/nutrition/
+    - assets/icon/
     - .env
   
   fonts:

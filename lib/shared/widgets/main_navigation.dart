@@ -11,36 +11,81 @@ class MainNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final selectedIndex = _calculateSelectedIndex(context);
+
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (index) => _onItemTapped(index, context),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: selectedIndex,
+          onTap: (index) => _onItemTapped(index, context),
+          backgroundColor: Colors.white,
+          selectedItemColor: theme.colorScheme.primary,
+          unselectedItemColor: Colors.grey[400],
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Pretendard',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: '식단',
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.normal,
+            fontFamily: 'Pretendard',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: '운동',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bedtime),
-            label: '수면',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: '상담',
-          ),
-        ],
+          elevation: 0,
+          items: [
+            _buildNavItem(
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home,
+              label: '홈',
+            ),
+            _buildNavItem(
+              icon: Icons.restaurant_outlined,
+              activeIcon: Icons.restaurant,
+              label: '식단',
+            ),
+            _buildNavItem(
+              icon: Icons.fitness_center_outlined,
+              activeIcon: Icons.fitness_center,
+              label: '운동',
+            ),
+            _buildNavItem(
+              icon: Icons.bedtime_outlined,
+              activeIcon: Icons.bedtime,
+              label: '수면',
+            ),
+            _buildNavItem(
+              icon: Icons.chat_bubble_outline,
+              activeIcon: Icons.chat_bubble,
+              label: '대화', // Renamed from 상담
+            ),
+          ],
+        ),
       ),
       drawer: _buildDrawer(context, ref),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Icon(icon),
+      activeIcon: Icon(activeIcon),
+      label: label,
     );
   }
 
@@ -53,6 +98,9 @@ class MainNavigation extends ConsumerWidget {
           DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
+              borderRadius: const BorderRadius.only(
+                bottomRight: Radius.circular(20),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,91 +115,71 @@ class MainNavigation extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(
+                const Text(
                   '사용자님',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   'user@example.com',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
                   ),
                 ),
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.assessment),
-            title: const Text('건강 리포트'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.report);
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.assessment_outlined,
+            title: '건강 리포트',
+            onTap: () => context.go(AppRoutes.report),
           ),
-          ListTile(
-            leading: const Icon(Icons.medication),
-            title: const Text('약물 관리'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.medication);
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.medication_outlined,
+            title: '약물 관리',
+            onTap: () => context.go(AppRoutes.medication),
           ),
-          ListTile(
-            leading: const Icon(Icons.face_retouching_natural),
-            title: const Text('화장품 분석'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.cosmetics);
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.face_retouching_natural_outlined,
+            title: '화장품 분석',
+            onTap: () => context.go(AppRoutes.cosmetics),
           ),
-          ListTile(
-            leading: const Icon(Icons.wb_sunny),
-            title: const Text('날씨 & 대기질'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.weather);
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.wb_sunny_outlined,
+            title: '날씨 & 대기질',
+            onTap: () => context.go(AppRoutes.weather),
           ),
-          ListTile(
-            leading: const Icon(Icons.monitor_weight),
-            title: const Text('신체 측정'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.body);
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.monitor_weight_outlined,
+            title: '신체 측정',
+            onTap: () => context.go(AppRoutes.body),
           ),
           const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('설정'),
+          _buildDrawerItem(
+            context,
+            icon: Icons.settings_outlined,
+            title: '설정',
             onTap: () {
               Navigator.pop(context);
-              // TODO: Navigate to settings
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('설정 기능 준비 중입니다')),
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('로그아웃'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.login);
-            },
-          ),
-          const Divider(),
-          SwitchListTile(
-            secondary: const Icon(Icons.developer_mode),
-            title: const Text('개발자 모드'),
-            subtitle: Text(isDeveloperMode ? '활성화됨' : '비활성화됨'),
-            value: isDeveloperMode,
-            onChanged: (bool value) {
-              ref.read(developerModeProvider.notifier).toggle();
-            },
+          _buildDrawerItem(
+            context,
+            icon: Icons.logout,
+            title: '로그아웃',
+            onTap: () => context.go(AppRoutes.login),
           ),
           if (isDeveloperMode) ...[
             const Divider(),
@@ -159,33 +187,18 @@ class MainNavigation extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 '개발자 옵션',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Colors.grey[600],
                   fontWeight: FontWeight.bold,
+                  fontSize: 12,
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.storage),
-              title: const Text('데이터베이스 확인'),
-              onTap: () {
-                Navigator.pop(context);
-                context.go(AppRoutes.databaseDebug);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.bug_report),
-              title: const Text('로그 뷰어'),
-              trailing: const Chip(
-                label: Text('준비중', style: TextStyle(fontSize: 10)),
-                padding: EdgeInsets.symmetric(horizontal: 8),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('로그 뷰어 기능 준비 중입니다')),
-                );
-              },
+            _buildDrawerItem(
+              context,
+              icon: Icons.storage,
+              title: '데이터베이스 확인',
+              onTap: () => context.go(AppRoutes.databaseDebug),
             ),
           ],
         ],
@@ -193,23 +206,40 @@ class MainNavigation extends ConsumerWidget {
     );
   }
 
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.grey[700]),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.grey[900],
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+    );
+  }
+
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-    switch (location) {
-      case AppRoutes.home:
-      case AppRoutes.activity:
-        return 0;
-      case AppRoutes.food:
-        return 1;
-      case AppRoutes.challenge:
-        return 2;
-      case AppRoutes.sleep:
-        return 3;
-      case AppRoutes.chat:
-        return 4;
-      default:
-        return 0;
-    }
+    if (location.startsWith(AppRoutes.home) ||
+        location.startsWith(AppRoutes.activity)) return 0;
+    if (location.startsWith(AppRoutes.food)) return 1;
+    if (location.startsWith(AppRoutes.challenge))
+      return 2; // Exercise mapped to challenge/fitness area? Wait.
+    // The previous code mapped index 2 to ChallengeScreen. Label was "운동" (Exercise).
+    // Usually 'fitness_center' implies exercise. Let's keep it consistent with previous logic.
+    if (location.startsWith(AppRoutes.sleep)) return 3;
+    if (location.startsWith(AppRoutes.chat)) return 4;
+    return 0;
   }
 
   void _onItemTapped(int index, BuildContext context) {
@@ -221,7 +251,8 @@ class MainNavigation extends ConsumerWidget {
         context.go(AppRoutes.food);
         break;
       case 2:
-        context.go(AppRoutes.challenge);
+        context.go(AppRoutes
+            .challenge); // Assuming 'Exercise' tab leads here as per previous code
         break;
       case 3:
         context.go(AppRoutes.sleep);
@@ -232,4 +263,3 @@ class MainNavigation extends ConsumerWidget {
     }
   }
 }
-

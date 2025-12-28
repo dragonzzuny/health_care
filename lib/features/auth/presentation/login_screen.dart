@@ -27,20 +27,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-
-    // Loading state is handled by the provider state watching
-
     try {
       await ref
           .read(authStateProvider.notifier)
           .login(_emailController.text, _passwordController.text);
-      // Navigation is handled by router based on auth state
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('로그인 실패: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -48,19 +45,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _socialLogin(String provider) async {
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     try {
-      // Simulate social login process
-      await Future.delayed(const Duration(seconds: 1));
-
+      await Future.delayed(const Duration(milliseconds: 300));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$provider 로그인 성공'),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         context.go(AppRoutes.home);
@@ -70,312 +63,259 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$provider 로그인 실패: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch global auth state
     final authState = ref.watch(authStateProvider);
     final _isLoading = authState.isLoading;
+    final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor:
+          theme.colorScheme.surfaceContainerHighest, // Soft background
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 60),
-
-              // Logo and Title
-              Column(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      Icons.health_and_safety,
-                      size: 60,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'SignCare',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '건강한 삶을 위한 스마트 헬스케어',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 48),
-
-              // Login Form
-              Form(
-                key: _formKey,
-                child: Column(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo & Header
+                Column(
                   children: [
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: '이메일',
-                        hintText: 'example@email.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '이메일을 입력해주세요';
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                            .hasMatch(value)) {
-                          return '올바른 이메일 형식을 입력해주세요';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: '비밀번호',
-                        hintText: '비밀번호를 입력하세요',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                    Container(
+                      height: 120,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.shadow,
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/icon/to_be_converted_icon.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            // Fallback if asset not found yet
+                            return Icon(Icons.health_and_safety,
+                                size: 60, color: theme.colorScheme.primary);
                           },
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '비밀번호를 입력해주세요';
-                        }
-                        if (value.length < 6) {
-                          return '비밀번호는 6자 이상이어야 합니다';
-                        }
-                        return null;
-                      },
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      '환영합니다',
+                      style: theme.textTheme.displaySmall,
                     ),
                     const SizedBox(height: 8),
-
-                    // Forgot Password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('비밀번호 찾기 기능 준비 중입니다')),
-                          );
-                        },
-                        child: const Text('비밀번호를 잊으셨나요?'),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Login Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _login,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : const Text(
-                                '로그인',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
+                    Text(
+                      'SignCare와 함께 건강한 하루를 시작하세요',
+                      style: theme.textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 48),
 
-              // Divider
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '또는',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                // Main Card
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: '이메일',
+                              hintText: 'user@example.com',
+                              prefixIcon: Icon(Icons.email_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '이메일을 입력해주세요';
+                              }
+                              return null;
+                            },
                           ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: '비밀번호',
+                              hintText: '••••••',
+                              prefixIcon:
+                                  const Icon(Icons.lock_outline_rounded),
+                              suffixIcon: IconButton(
+                                icon: Icon(_obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
+                                onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.length < 6) {
+                                return '비밀번호는 6자 이상이어야 합니다';
+                              }
+                              return null;
+                            },
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 0, vertical: 8),
+                              ),
+                              child: const Text('비밀번호 찾기'),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 54,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _login,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white, strokeWidth: 2))
+                                  : const Text('로그인'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Social Login Buttons
-              Column(
-                children: [
-                  _buildSocialLoginButton(
-                    'Google로 계속하기',
-                    Icons.g_mobiledata,
-                    Colors.red,
-                    () => _socialLogin('Google'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSocialLoginButton(
-                    'Apple로 계속하기',
-                    Icons.apple,
-                    Colors.black,
-                    () => _socialLogin('Apple'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSocialLoginButton(
-                    'Kakao로 계속하기',
-                    Icons.chat_bubble,
-                    const Color(0xFFFFE812),
-                    () => _socialLogin('Kakao'),
-                    textColor: Colors.black,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSocialLoginButton(
-                    'Naver로 계속하기',
-                    Icons.language,
-                    const Color(0xFF03C75A),
-                    () => _socialLogin('Naver'),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Sign Up Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '계정이 없으신가요? ',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.go(AppRoutes.register);
-                    },
-                    child: const Text(
-                      '회원가입',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Guest Login
-              TextButton(
-                onPressed: () {
-                  context.go(AppRoutes.home);
-                },
-                child: Text(
-                  '게스트로 둘러보기',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    decoration: TextDecoration.underline,
                   ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 32),
+
+                // Social Login Section
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text('소셜 계정으로 계속하기',
+                              style: theme.textTheme.labelMedium),
+                        ),
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _SocialIconBtn(
+                          icon: Icons.g_mobiledata,
+                          color: Colors.red,
+                          onTap: () => _socialLogin('Google'),
+                        ),
+                        const SizedBox(width: 20),
+                        _SocialIconBtn(
+                          icon: Icons.apple,
+                          color: Colors.black,
+                          onTap: () => _socialLogin('Apple'),
+                        ),
+                        const SizedBox(width: 20),
+                        _SocialIconBtn(
+                          icon: Icons.chat_bubble,
+                          color: const Color(0xFFFFE812),
+                          onTap: () => _socialLogin('Kakao'),
+                          iconColor: Colors.black,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 32),
+
+                // Footer
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('계정이 없으신가요?', style: theme.textTheme.bodyMedium),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.register),
+                      child: const Text('회원가입'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildSocialLoginButton(
-    String text,
-    IconData icon,
-    Color backgroundColor,
-    VoidCallback onPressed, {
-    Color textColor = Colors.white,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: OutlinedButton.icon(
-        onPressed: _isLoading ? null : onPressed,
-        icon: Icon(icon, color: backgroundColor),
-        label: Text(
-          text,
-          style: TextStyle(
-            color: textColor == Colors.white ? backgroundColor : textColor,
-            fontWeight: FontWeight.w500,
-          ),
+class _SocialIconBtn extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  final Color iconColor;
+
+  const _SocialIconBtn({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.iconColor = Colors.white,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(50),
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: backgroundColor),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: backgroundColor == const Color(0xFFFFE812)
-              ? backgroundColor
-              : Colors.transparent,
-        ),
+        child: Icon(icon, color: iconColor, size: 24),
       ),
     );
   }

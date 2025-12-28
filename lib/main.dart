@@ -19,11 +19,11 @@ void main() async {
 final dataInitializationProvider = FutureProvider<bool>((ref) async {
   final db = ref.watch(appDatabaseProvider);
   final initializer = DataInitializer(db);
-  
+
   try {
     // 이미 초기화되었는지 확인
     final isInitialized = await initializer.isDataInitialized();
-    
+
     if (!isInitialized) {
       // Mock 데이터 초기화
       await initializer.initializeAllMockData();
@@ -31,7 +31,7 @@ final dataInitializationProvider = FutureProvider<bool>((ref) async {
     } else {
       print('✅ 데이터가 이미 초기화되어 있습니다');
     }
-    
+
     return true;
   } catch (e) {
     print('❌ 데이터 초기화 실패: $e');
@@ -69,22 +69,58 @@ class HealthcareApp extends ConsumerWidget {
       builder: (context, child) {
         return dataInitialization.when(
           data: (success) => child ?? const SizedBox(),
-          loading: () => const MaterialApp(
+          loading: () => MaterialApp(
             home: Scaffold(
+              backgroundColor: Colors.white,
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text(
-                      'SignCare를 준비하고 있습니다...',
-                      style: TextStyle(fontSize: 16),
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/icon/to_be_converted_icon.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.health_and_safety,
+                                size: 60, color: Color(0xFF50B4A0));
+                          },
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      '건강 데이터를 초기화하는 중입니다.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'SignCare',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
+                        fontFamily: 'Pretendard',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '데이터를 준비하고 있습니다...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontFamily: 'Pretendard',
+                      ),
                     ),
                   ],
                 ),
@@ -106,7 +142,8 @@ class HealthcareApp extends ConsumerWidget {
                     const SizedBox(height: 16),
                     const Text(
                       'SignCare를 시작할 수 없습니다',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -133,4 +170,3 @@ class HealthcareApp extends ConsumerWidget {
     );
   }
 }
-

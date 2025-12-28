@@ -22,7 +22,6 @@ import '../../debug/database_debug_screen.dart';
 
 // Route paths
 class AppRoutes {
-  static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -47,37 +46,23 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.login,
     redirect: (context, state) {
       final isLoggedIn = authState.isAuthenticated;
       final isLoggingIn = state.uri.toString() == AppRoutes.login;
       final isRegistering = state.uri.toString() == AppRoutes.register;
-      final isSplash = state.uri.toString() == AppRoutes.splash;
-
-      // Allow splash to do its thing (it navigates manually mostly, or we can just let it finish)
-      // But actually, if we are logged in, we shouldn't be in login/register
-
-      if (isSplash) {
-        return null;
-      }
 
       if (!isLoggedIn && !isLoggingIn && !isRegistering) {
         return AppRoutes.login;
       }
 
-      if (isLoggedIn && (isLoggingIn || isRegistering || isSplash)) {
+      if (isLoggedIn && (isLoggingIn || isRegistering)) {
         return AppRoutes.home;
       }
 
       return null;
     },
     routes: [
-      // Splash Screen
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
-      ),
-
       // Auth Routes
       GoRoute(
         path: AppRoutes.login,
@@ -180,90 +165,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
-
-// Splash Screen
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    // Simulate initialization delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Check if user is logged in
-    // For now, navigate to login
-    if (mounted) {
-      context.go(AppRoutes.login);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App Logo
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.health_and_safety,
-                size: 64,
-                color: Color(0xFF2E7D32),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // App Name
-            Text(
-              'SignCare',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-
-            // App Description
-            Text(
-              'AI 기반 개인 맞춤형 헬스케어',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-            ),
-            const SizedBox(height: 48),
-
-            // Loading Indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -39,7 +39,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    ndkVersion = "27.0.12077973"  // 요구되는 NDK 버전으로 업데이트 (뒤로 호환됨)
+    ndkVersion = "28.2.13676358"  // 요구되는 NDK 버전으로 업데이트 (뒤로 호환됨)
 
 }
 
